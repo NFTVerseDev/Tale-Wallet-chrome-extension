@@ -1,14 +1,9 @@
 
-Sample Extension Commands extension
+Tale Wallet's Google Chrome Extension
 =======
 
-Press Ctrl+Shift+F to open the browser action popup, press Ctrl+Shift+Y to send an event.
+[TaleWallet testnet Website](https://testnet.talewallet.com)
 
-[Zipfile](http://developer.chrome.com/extensions/examples/api/commands.zip)
-
-Content is licensed under the [Google BSD License](https://developers.google.com/open-source/licenses/bsd).
-
-Calls
------
-
-* [commands.onCommand](https://developer.chrome.com/extensions/commands#event-onCommand)
+About Tale Wallet:
+=======
+Tale Wallet is a non-custodian wallet on Algorand blockchain. While signing up user can allow Talewallet to manage the keys thus converting it into a custodian wallet.
