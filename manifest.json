@@ -1,0 +1,47 @@
+{
+  "name": "Tale Wallet",
+  "description": "Bharat's own crypto wallet.",
+  "version": "0.1",
+  "manifest_version": 2,
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "identity",
+    "https://bs-dev.api.onnftverse.com/*",
+    "https://dev.talewallet.com/*"
+  ],
+  "browser_action": {
+    "default_popup": "views/browser_action.html"
+  },
+  "icons": {
+    "128": "images/icon-128.png",
+    "48": "images/icon-48.png",
+    "16":"images/icon-16.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://news.google.com/*"],
+      "js" : ["js/contentscript.js"]
+    }
+  ],
+  "commands": {
+    "toggle-feature": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "MacCtrl+Shift+Y"
+       },
+      "description": "Send a 'toggle-feature' event to the extension"
+    },
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "MacCtrl+Shift+F"
+      }
+    }
+  }
+}

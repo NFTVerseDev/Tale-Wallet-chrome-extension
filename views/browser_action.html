@@ -1,0 +1,185 @@
+<style type="text/css">
+    /* Bordered form */
+    form {
+        border: 3px solid #f1f1f1;
+    }
+
+    /* Full-width inputs */
+    input[type=text], input[type=password] {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+
+    /* Set a style for all buttons */
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    /* Add a hover effect for buttons */
+    button:hover {
+        opacity: 0.8;
+    }
+
+    /* Extra style for the cancel button (red) */
+    .cancelbtn {
+        width: auto;
+        padding: 10px 18px;
+        background-color: #f44336;
+    }
+
+    /* Center the avatar image inside this container */
+    .imgcontainer {
+        text-align: center;
+        margin: 24px 0 12px 0;
+    }
+
+    /* Avatar image */
+    img.avatar {
+        width: 40%;
+        border-radius: 50%;
+    }
+    img.avatar1 {
+        width: 30px;
+        border-radius: 50%;
+    }
+
+    /* Add padding to containers */
+    .container {
+        padding: 16px;
+    }
+
+    /* The "Forgot password" text */
+    span.psw {
+        float: right;
+        padding-top: 16px;
+    }
+
+    /* Change styles for span and cancel button on extra small screens */
+    @media screen and (max-width: 300px) {
+        span.psw {
+            display: block;
+            float: none;
+        }
+        .cancelbtn {
+            width: 100%;
+        }
+    }
+.main{
+    width: 300px;
+    text-align: center;
+}
+a{
+    text-decoration: none;
+    color: cornflowerblue;
+    cursor: pointer;
+}
+li{
+    margin-bottom: 10px;
+}
+ol{
+    padding-left: 15px;
+}
+#rebuttals {
+    text-align: left;
+    margin-top: 40px;
+}
+.btn{
+    border: none;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    background-color: inherit;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.button1 {
+    color: #FFFFFF;
+    background-color: #f0ad4e;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+    .checkmark {
+        display:inline-block;
+        width: 22px;
+        height:22px;
+        -ms-transform: rotate(45deg); /* IE 9 */
+        -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+        transform: rotate(45deg);
+    }
+
+    .checkmark_circle {
+        position: absolute;
+        width:22px;
+        height:22px;
+        background-color: green;
+        border-radius:11px;
+        left:0;
+        top:0;
+    }
+
+    .checkmark_stem {
+        position: absolute;
+        width:3px;
+        height:9px;
+        background-color:#fff;
+        left:11px;
+        top:6px;
+    }
+
+    .checkmark_kick {
+        position: absolute;
+        width:3px;
+        height:3px;
+        background-color:#fff;
+        left:8px;
+        top:12px;
+    }
+    .cross_mark{
+        height: 22px;
+        width: 22px;
+        background-color: #ff0000;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 21px;
+        padding-left: 4px;
+        padding-right: 4px;
+        color: white;
+        font-family: monospace;
+    }
+    .transparencyli{
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+    .transparencyul{
+        list-style-type: none;
+        padding-left: 0px;
+        text-align: left;
+    }
+</style>
+<script src="../js/algosdk.min.js"></script>
+<script src="../js/contentscript.js"></script>
+<div class="main">
+    <h2>Tale Wallet </h2>
+    <div style="float: right" id="tlw_logout"></div>
+    <div id="wallet_div"></div>
+    <div style="text-align: left;" id="login_UI">
+    </div>
+    <div id="wallet_asset_div"></div>
+
+
+
+</div>
