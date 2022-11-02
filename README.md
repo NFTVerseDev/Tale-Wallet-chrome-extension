@@ -28,9 +28,13 @@ One can integrate tale wallet using our javascript sdk by adding a single div in
 <img src="https://nftverse-assets-stage.s3.ap-south-1.amazonaws.com/nftverse/screenshots/wallet-hom.png">
 
 Tale Wallet's React SDK: [React SDK](https://github.com/NFTVerseDev/TaleWallet-React-SDK.git)
+
 Tale Wallet's vanilla JS Library: [VanillaJS Library](https://github.com/NFTVerseDev/TaleWallet-VanillaJS-Library.git)
+
 Tale Wallet's Android SDK: Coming soon
+
 Tale Wallet's iOS SDK: Coming soon
+
 Tale Wallet's Flutter SDK: Coming soon
 
 Tale Wallet Mobile App
