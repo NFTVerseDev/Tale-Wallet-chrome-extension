@@ -23,7 +23,9 @@ Whenever someone creates a marketplace on NFTVerse, we create an account in Tale
 
 Use of Tale wallet SDKs on marketplaces or any website
 =======
-One can integrate tale wallet using our javascript sdk by adding a single div in their existing websites and Apps
+One can integrate tale wallet using our javascript sdk by adding a single div in their existing websites and Apps.
+
+On any marketplace created using NFTVerse, user can either import an external algorand account or create a new account on  the marketplace itself. Users can also buy NFT using Tale wallet and store the purchased NFT in the Tale Wallet.
 
 <img src="https://nftverse-assets-stage.s3.ap-south-1.amazonaws.com/nftverse/screenshots/wallet-hom.png">
 
