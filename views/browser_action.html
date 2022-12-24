@@ -1,5 +1,8 @@
 <style type="text/css">
     /* Bordered form */
+    :root{
+        --taile-color:#bf00ff;
+    }
     form {
         border: 3px solid #f1f1f1;
     }
@@ -8,14 +11,76 @@
     input[type=text], input[type=password] {
         width: 100%;
         padding: 12px 20px;
-        margin: 8px 0;
         display: inline-block;
         border: 1px solid #ccc;
         box-sizing: border-box;
+        background-color: inherit;
     }
 
+
+    /* .shadow-1{
+
+        box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+    } */
+    .border-none{
+        border: none !important;
+    }
+    .email-input-container{
+border-radius: 10px;
+background:white;
+overflow: hidden;
+    }
+    .email-input-container img{
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+    }
+    .outline-none{
+        outline: none;
+    }
+    .w-full{
+        width: 100%;
+    }
+    .py-10{
+        padding: 10px 0;
+    }
+    .gap-20{
+        gap: 20px;
+    }
+    .text-center{
+        text-align: center;
+    }
+
+    .font-bold{
+        font-weight: 600;
+    }
+    .font-semibold{
+        font-weight: 500;
+    }
+    .text-2xl{
+        font-size: 32px;
+    }
+    .text-lg{
+        font-size: 20px;
+    }
+
+    .text-medium{
+        font-size: 16px;
+    }
+    .text-start{
+        text-align: start;
+    }
+    .font-14{
+        font-size: 14px;
+    }
+    .text-tale{
+        color: var(--taile-color);
+    }
+    .text-warning{
+        color: #ff0000;
+    }
     /* Set a style for all buttons */
-    button {
+    /* button {
         background-color: #4CAF50;
         color: white;
         padding: 14px 20px;
@@ -23,12 +88,71 @@
         border: none;
         cursor: pointer;
         width: 100%;
+    } */
+    .create-account-actions{
+        display: flex ;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .manage-account-details{
+        display: flex;
+        flex-direction: column;
+        gap:20px;
+    }
+    .btn{
+        border-radius: 99999px;
+        color: #bbff00;
+        width: 100%;
+        padding: 15px 0;
+        cursor: pointer;
+        border: 1px solid #bbff00;
+        transition: .2s ease;
+
+    }
+
+    .activity-border{
+        width: 100%;
+        height: 2px;
+        background: #aaa6a6;
+        position: absolute;
+        bottom: 0;
+    }
+    
+    .primary-btn{
+        background-color: #0c0c0c;
+        
+    } 
+    .primary-btn:hover{
+        background-color: #bbff00;
+        color:#0c0c0c ;
+        
+    }
+    .secondary-btn{
+        background-color: #ffffff;
+        color: black;
+    }
+    .secondary-btn:hover{
+        background-color: #bbff00;
+        color: #ffffff;
+    }
+    .activity-button{
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .activity-selected{
+        border-bottom: 2px solid #bbff00;
+    }
+
+    button:disabled {
+        cursor: auto;
+        background-color:gray;
     }
 
     /* Add a hover effect for buttons */
-    button:hover {
+    /* button:hover {
         opacity: 0.8;
-    }
+    } */
 
     /* Extra style for the cancel button (red) */
     .cancelbtn {
@@ -45,25 +169,110 @@
 
     /* Avatar image */
     img.avatar {
-        width: 40%;
+        width: 60%;
         border-radius: 50%;
+    }
+    .justify-end{
+        justify-content: flex-end;
+    }
+    .justify-between{
+        justify-content: space-between;
+    }
+    .justify-center{
+        justify-content: center;
     }
     img.avatar1 {
         width: 30px;
         border-radius: 50%;
     }
 
-    /* Add padding to containers */
-    .container {
-        padding: 16px;
+    .flex{
+        display: flex;
+
     }
+    .hidden{
+        display: none;
+    }
+    .flex-wrap{
+        flex-wrap: wrap;
+    }
+
+    .text-xl{
+        font-size: 28px;
+    }
+    .flex-col{
+        flex-direction: column;
+    }
+    .items-start{
+        align-items: flex-start;
+    }
+    .gap-5{
+        gap: 5px;
+    }
+    .gap-10{
+        gap: 10px;
+    }
+    .gap-40{
+        gap: 40px;
+    }
+    .mt-20{
+        margin-top: 20px;
+    }
+    .mt-10{
+        margin-top: 10px;
+    }
+    .my-20{
+        margin: 20px 0;
+    }
+    .mx-20{
+        margin: 0 20px;
+    }
+    /* position */
+    .relative{
+        position: relative;
+    }
+    .absolute{
+        position: absolute;
+    }
+
+    .left-10{
+        left: 10px;
+    }
+    .z-10{
+        z-index: 10;
+    }
+    /* Add padding to containers */
+    /* .container {
+        padding: 16px;
+    } */
 
     /* The "Forgot password" text */
     span.psw {
         float: right;
         padding-top: 16px;
     }
+    .asset-image{
+        width: 120px;
+        height: 150px;
+        object-fit: contain;
+    }
+    .asset-container{
+        width: 120px;
+        height: 180px;
+        border: 1px solid gray;
+        /* border-radius: 10px; */
+        overflow: hidden;
+        color: black;
+        font-weight: 600;
+         background: white;
 
+    }
+    .break-word{
+        word-wrap: break-word;
+    }
+    .gap-y-10{
+        column-gap: 10px;
+    }
     /* Change styles for span and cancel button on extra small screens */
     @media screen and (max-width: 300px) {
         span.psw {
@@ -77,6 +286,14 @@
 .main{
     width: 300px;
     text-align: center;
+    min-height: 550px;
+    padding: 10px;
+    
+}
+body{
+    border-radius: 40px;
+    margin: 0;
+    background-color: #f1f1f2;
 }
 a{
     text-decoration: none;
@@ -93,7 +310,7 @@ ol{
     text-align: left;
     margin-top: 40px;
 }
-.btn{
+/* .btn{
     border: none;
     display: inline-block;
     padding: 8px 16px;
@@ -105,7 +322,7 @@ ol{
     text-align: center;
     cursor: pointer;
     white-space: nowrap;
-}
+} */
 .button1 {
     color: #FFFFFF;
     background-color: #f0ad4e;
@@ -171,15 +388,87 @@ ol{
     }
 </style>
 <script src="../js/algosdk.min.js"></script>
-<script src="../js/contentscript.js"></script>
-<div class="main">
-    <h2>Tale Wallet </h2>
+<script type="module" src="../js/contentscript.js">
+</script>
+<div class="flex flex-col gap-20 main ">
+    <span class="text-xl font-bold">Tale Wallet </span>
+    <!-- <a href="./login_otp.html?otp=123&pass=jkl"> otp login</a> -->
     <div style="float: right" id="tlw_logout"></div>
-    <div id="wallet_div"></div>
+    <div  id="wallet_div"></div>
     <div style="text-align: left;" id="login_UI">
     </div>
-    <div id="wallet_asset_div"></div>
+    <div class="flex flex-col gap-20" id="wallet_asset_div"></div>
 
 
 
 </div>
+<!-- <div>
+    <img src="../images/talewallet.svg" class="avatar"/>
+</div> -->
+<!-- <div class="flex flex-col gap-40">
+    
+    <div class="font-bold text-tale text-xl">
+        Setup Your Password
+    </div>
+    <div class="flex flex-col items-start gap-10">
+        <span class="font-semibold text-medium">
+            Create password
+        </span>
+        <div class="flex shadow-1 w-full  email-input-container">
+            <input type="password" class="border-none outline-none mt-10" placeholder="Enter your password here" name="uname"
+                id="account_setup_password" required>
+        </div>
+
+    </div>
+    <div class="flex flex-col items-start gap-10">
+        <span class="font-semibold text-medium">
+            Repeat password
+        </span>
+        <div class="flex shadow-1 w-full  email-input-container">
+            <input type="password" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
+                id="account_setup_repeat_password" required>
+        </div>
+
+    </div>
+    <div class="text-warning hidden" id="password_missmatch" >Password and Confirm password does not match</div>
+    <button class="primary-btn btn" id="confirm_password">
+        Confirm password
+    </button>
+</div> -->
+
+<!-- <div class="flex flex-col gap-20">
+    <div class="text-start">
+        <button class="border-none" id ="back_to_password"> back</button>
+    </div>
+    <div>
+        <span class="text-xl font-bold text-tale">
+            Enter your passphrase
+        </span>
+    </div>
+    <div class="flex flex-col gap-20">
+        <div class="flex flex-col gap-10 items-start">
+            <span># no1</span>
+            <div class="flex shadow-1 w-full  email-input-container">
+                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
+                    id="passphrase_1" required>
+            </div>
+        </div>
+        <div class="flex flex-col gap-10 items-start">
+            <span># no2</span>
+            <div class="flex shadow-1 w-full  email-input-container">
+                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
+                    id="passphrase_2" required>
+            </div>
+        </div>
+        <div class="flex flex-col gap-10 items-start">
+            <span># no3</span>
+            <div class="flex shadow-1 w-full  email-input-container">
+                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
+                    id="passphrase_3" required>
+            </div>
+        </div>
+    </div>
+    <button class="btn primary-btn">
+        Continue
+    </button>
+</div> -->
