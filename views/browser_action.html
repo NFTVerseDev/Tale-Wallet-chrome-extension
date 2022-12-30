@@ -11,25 +11,37 @@
     input[type=text], input[type=password] {
         width: 100%;
         padding: 12px 20px;
-        display: inline-block;
+        /* display: inline-block; */
         border: 1px solid #ccc;
         box-sizing: border-box;
         background-color: inherit;
     }
 
+    /* .box-shadow-1{
+        box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+    
+    } */
 
     /* .shadow-1{
 
         box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
     } */
+
     .border-none{
         border: none !important;
+    }
+    .border-slate{
+        border: 1px solid #bdb8b8;
+    }
+    .border-radius-10{
+        border-radius: 10px;
     }
     .email-input-container{
 border-radius: 10px;
 background:white;
 overflow: hidden;
     }
+
     .email-input-container img{
         width: 40px;
         height: 40px;
@@ -41,11 +53,46 @@ overflow: hidden;
     .w-full{
         width: 100%;
     }
+    .w-40{
+        width: 30px;
+    }
+   .d-50{
+    width: 50px;
+    height: 50px;
+   }
+   .d-150{
+    width: 150px;
+    height: 150px;
+   }
+    .w-100{
+        width: 100px;
+    }
+    .h-100{
+        height: 100px;
+    }
+    .h-40{
+        height: 30px;
+    }
     .py-10{
-        padding: 10px 0;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .px-30{
+        padding-left:30px;
+        padding-right: 30px;
+    }
+    .px-10{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .p-10{
+        padding: 10px;
     }
     .gap-20{
         gap: 20px;
+    }
+    .gap-100{
+        gap:100px;
     }
     .text-center{
         text-align: center;
@@ -98,6 +145,16 @@ overflow: hidden;
         display: flex;
         flex-direction: column;
         gap:20px;
+    }
+    .algo-network{
+        border-radius: 99999px;
+        color: black;
+        background: white;
+        padding: 10px 20px;
+        position: relative;
+        top: -10px;
+
+        border: 1px solid #bbff00;
     }
     .btn{
         border-radius: 99999px;
@@ -181,6 +238,12 @@ overflow: hidden;
     .justify-center{
         justify-content: center;
     }
+    .justify-evenly{
+        justify-content: space-evenly;
+    }
+    .justify-around{
+        justify-content: space-around;
+    }
     img.avatar1 {
         width: 30px;
         border-radius: 50%;
@@ -191,10 +254,13 @@ overflow: hidden;
 
     }
     .hidden{
-        display: none;
+        display: none ;
     }
     .flex-wrap{
         flex-wrap: wrap;
+    }
+    .object-contain{
+        object-fit: contain;
     }
 
     .text-xl{
@@ -205,6 +271,9 @@ overflow: hidden;
     }
     .items-start{
         align-items: flex-start;
+    }
+    .items-center{
+        align-items: center;
     }
     .gap-5{
         gap: 5px;
@@ -234,7 +303,9 @@ overflow: hidden;
     .absolute{
         position: absolute;
     }
-
+    .fixed{
+        position: fixed;
+    }
     .left-10{
         left: 10px;
     }
@@ -283,12 +354,83 @@ overflow: hidden;
             width: 100%;
         }
     }
+
+#modal-container{
+    width: 300px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    position: fixed;
+    top:0px;
+    font-size: 14px;
+
+
+}
+
+/* back UI */
+.back-s1{
+  width:10px;
+  height:3px;
+  background:black;
+  transform:rotate(135deg)
+}
+.back-s2{
+  position:relative;
+  left:2px;
+  width:20px;
+  height:3px;
+  background:black;
+}
+.back-s3{
+  width:10px;
+  height:3px;
+  background:black;
+  transform:rotate(45deg)
+}
+
+.profile-modal{
+    position: absolute;
+    width: 210px;
+    background-color: #f1f1f2;
+    border-radius: 10px;
+    right: 5px;
+    top: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.modal-items-container{
+    display: flex;
+    border-radius: 30px;
+    padding: 10px 0;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding-left: 10px;
+    transition: .2s ease;
+    box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+}
+
+.modal-items-container:hover{
+    background: #fcfafa;
+}
+
 .main{
     width: 300px;
     text-align: center;
     min-height: 550px;
-    padding: 10px;
+    /* padding: 10px; */
     
+}
+.wallet-address-container{
+    /* border: 1px solid; */
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+
 }
 body{
     border-radius: 40px;
@@ -309,6 +451,14 @@ ol{
 #rebuttals {
     text-align: left;
     margin-top: 40px;
+}
+#wallet_div{
+    padding: 10px 10px;
+}
+.img-icon{
+    width: 15px;
+    height: 15px;
+    object-fit: contain;
 }
 /* .btn{
     border: none;
@@ -346,7 +496,6 @@ ol{
         left:0;
         top:0;
     }
-
     .checkmark_stem {
         position: absolute;
         width:3px;
@@ -387,13 +536,15 @@ ol{
         text-align: left;
     }
 </style>
+
 <script src="../js/algosdk.min.js"></script>
 <script type="module" src="../js/contentscript.js">
 </script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
 <div class="flex flex-col gap-20 main ">
-    <span class="text-xl font-bold">Tale Wallet </span>
+    <div class="text-xl font-bold " id="tale-wallet-headiong">Tale Wallet </div>
     <!-- <a href="./login_otp.html?otp=123&pass=jkl"> otp login</a> -->
-    <div style="float: right" id="tlw_logout"></div>
+    <!-- <div  id="tlw_logout"></div> -->
     <div  id="wallet_div"></div>
     <div style="text-align: left;" id="login_UI">
     </div>
@@ -402,73 +553,33 @@ ol{
 
 
 </div>
-<!-- <div>
-    <img src="../images/talewallet.svg" class="avatar"/>
-</div> -->
-<!-- <div class="flex flex-col gap-40">
-    
-    <div class="font-bold text-tale text-xl">
-        Setup Your Password
-    </div>
-    <div class="flex flex-col items-start gap-10">
-        <span class="font-semibold text-medium">
-            Create password
-        </span>
-        <div class="flex shadow-1 w-full  email-input-container">
-            <input type="password" class="border-none outline-none mt-10" placeholder="Enter your password here" name="uname"
-                id="account_setup_password" required>
-        </div>
 
-    </div>
-    <div class="flex flex-col items-start gap-10">
-        <span class="font-semibold text-medium">
-            Repeat password
-        </span>
-        <div class="flex shadow-1 w-full  email-input-container">
-            <input type="password" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                id="account_setup_repeat_password" required>
-        </div>
+<!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+<div id="qrcode"></div>
+<script type="text/javascript">
+new QRCode(document.getElementById("qrcode"), "https://webisora.com");
+</script> -->
 
+
+<!-- <div class="profile-modal" id="profile-modal">
+    <div class="flex gap-10 px-10 items-center">
+      <span id="close-profile-modal">${backUi}</span>
+      <Span class="font-semibold text-medium">Profile</Span>
     </div>
-    <div class="text-warning hidden" id="password_missmatch" >Password and Confirm password does not match</div>
-    <button class="primary-btn btn" id="confirm_password">
-        Confirm password
-    </button>
+    <div class="flex flex-col gap-10 px-10">
+        <div class="flex justify-center">
+            <img src="../images/profile.svg"  class="d-50 object-contain"/>
+        </div>
+        <div class="flex justify-center">
+            <img src="../images/profile-icons/support.png"  class="d-150" />
+        </div>
+        <div class = "flex gap-10 items-center box-shadow-1 wallet-address-container">
+            <div style=" overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address">  ${tale_wallet_address}</div>
+            <div  id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div>
+        </div>
+        <button class="btn primary-btn">View on Algoscan</button>
+        <button class="btn secondary-btn">Export private key</button>
+    </div>
+
 </div> -->
 
-<!-- <div class="flex flex-col gap-20">
-    <div class="text-start">
-        <button class="border-none" id ="back_to_password"> back</button>
-    </div>
-    <div>
-        <span class="text-xl font-bold text-tale">
-            Enter your passphrase
-        </span>
-    </div>
-    <div class="flex flex-col gap-20">
-        <div class="flex flex-col gap-10 items-start">
-            <span># no1</span>
-            <div class="flex shadow-1 w-full  email-input-container">
-                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                    id="passphrase_1" required>
-            </div>
-        </div>
-        <div class="flex flex-col gap-10 items-start">
-            <span># no2</span>
-            <div class="flex shadow-1 w-full  email-input-container">
-                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                    id="passphrase_2" required>
-            </div>
-        </div>
-        <div class="flex flex-col gap-10 items-start">
-            <span># no3</span>
-            <div class="flex shadow-1 w-full  email-input-container">
-                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                    id="passphrase_3" required>
-            </div>
-        </div>
-    </div>
-    <button class="btn primary-btn">
-        Continue
-    </button>
-</div> -->

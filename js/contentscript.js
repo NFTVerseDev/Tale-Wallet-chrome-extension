@@ -1,4 +1,6 @@
-import { pinta_cloud } from "./config.js";
+import {pinta_cloud,NFTVERSE_DEV_API,BLOCKCHAIN_SERVICE,MARKETPLACE_SERVICE,app_token,ALGO_SCAN,talewallet_url} from "./config.js";
+
+// import "https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -15,14 +17,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }else if(result.leftAt === "account_creation"){
             chrome.storage.local.get(["secretKey"], (res) => {
                 // console.log([1,2,3,4,5,6])
-                 const propertyValues = Object.values(JSON.parse(res.secretKey));
+                //  const propertyValues = Object.values(JSON.parse(res.secretKey));
                 // savePassphraseToServer(algosdk.secretKeyToMnemonic(propertyValues));
-                accountSetup(propertyValues);
+                // accountSetup(propertyValues);
+                setUpPassword()
               });
         }
         else{
-            getClient();
-             getValues();
+            chrome.storage.local.get(["localPassword"], (res) => {
+                if(res.localPassword){
+                    loginWithPassword();
+                }else{
+                    getValues();
+                }
+            })
+            
         }
     })
     
@@ -33,6 +42,50 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+const backUi = `
+
+<div>
+<div class="back-s1"></div>
+<div class="back-s2"></div>
+<div class="back-s3"></div>
+</div>
+
+`;
+
+
+
+function loginWithPassword(){
+    document.getElementById('wallet_div').innerHTML = `
+    <div class="flex flex-col gap-100">
+      <div>
+          <img src="../images/talewallet.png" alt="Avatar" class="avatar"/>
+      </div>
+      <div class="flex flex-col gap-10">
+      <div class="flex flex-col shadow-1 w-full  email-input-container">
+        <input type="text" class="border-none outline-none underline-none" placeholder="Enter your password" name="uname" id="input_login_password" required>
+      </div>
+      <span class="text-warning" id="login_warning"></span>
+      <button class="btn primary-btn" id="submit_password" >Submit</button>
+      </div>
+      
+    </div>
+    `
+    const inputLoginPassword = document.getElementById("input_login_password");
+    document.getElementById("submit_password").onclick = ()=>{
+        chrome.storage.local.get(["localPassword"],(res)=>{
+            if(inputLoginPassword.value === res.localPassword){
+            getClient();
+            getValues();
+            }else{
+                document.getElementById("login_warning").innerText="Wrong password"
+            }
+        })
+    }
+    
+}
+
+
+
 function logout() {
     chrome.storage.local.clear(function() {
         var error = chrome.runtime.lastError;
@@ -40,7 +93,9 @@ function logout() {
             console.error(error);
         }
         document.getElementById('wallet_div').innerHTML = '';
-        document.getElementById('tlw_logout').innerHTML = '';
+        // document.getElementById('tlw_logout').innerHTML = '';
+        document.getElementById("tale-wallet-headiong").innerHTML ="Tale Wallet"
+        
         document.getElementById('wallet_asset_div').innerHTML = '';
         getValues();
     });
@@ -64,7 +119,7 @@ async function getBalance(addr) {
         // })
         
 
-        document.getElementById('wallet_balance').innerHTML  = amount;
+        document.getElementById('wallet_balance').innerHTML  = `${amount} Algos`;
         return amount;
     })().catch((e) => {
         console.log(e);
@@ -82,6 +137,10 @@ const fetchAssetDetails= async (url) =>{
  return data
 
 
+}
+
+function redirectToTalewalletWeb(append=""){
+    window.open(`https://talewallet.com/${append}`)
 }
 
 async function showAssets(accountInfo){
@@ -132,13 +191,13 @@ async function getClient(){
 }
 function copyToClipboard(address) {
     navigator.clipboard.writeText(address);
-    var tickUI =  ` <li class="transparencyli">
+    var tickUI =  ` <span class="transparencyli">
                             <span class="checkmark">
                            <div class="checkmark_circle"></div>
                             <div class="checkmark_stem"></div>
                            <div class="checkmark_kick"></div>
                            </span>\n`;
-    document.getElementById('copy_to_clipboard').innerHTML = tickUI + 'Address copied to clipboard'
+    document.getElementById('copy_to_clipboard').innerHTML = tickUI;
 }
 
 
@@ -148,33 +207,188 @@ function validateEmail(email) {
   }
 
 
-function getValues() {
-    chrome.storage.local.get(["tale_wallet_address"], async function (result) {
-        
-        console.log('Value currently is ', result);
-        var tale_wallet_address = result.tale_wallet_address;
-        console.log("wallet Address: " + tale_wallet_address);
-        let balance = getBalance(tale_wallet_address)
-        if (tale_wallet_address) {
-            //show account balance
-            document.getElementById('wallet_div').innerHTML = '<span style="margin-top: 10px;"><img src="../images/algorand.png" alt="Avatar" class="avatar1"><br />' +
-                '<div style="font-size: 14px; overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address">' + tale_wallet_address + '</div><br />' +
-                '<div style="font-size: 14px;" id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div><br /><br />' +
-                '<div style="font-size: 14px;" id="wallet_balance"> fetching ... </div><br /><br />';
+  const profileModalHTML = `
+        <div class="profile-modal" id="profile-modal">
+        <div class="flex gap-10 px-10 items-center">
+          <span id="close-profile-modal">${backUi}</span>
+          <Span class="font-semibold text-medium">Profile</Span>
+        </div>
+       <div class="flex flex-col gap-10 px-10">
+          <div class="modal-items-container" id="lock-wallet">
+              <span><img src="../images/profile-icons/lock.svg" class="img-icon"/></span>
+              <Span class="font-semibold text-medium">Lock</Span>
+          </div>
+          <div class="modal-items-container" id="view_on_algoscan">
+              <span><img src="../images/profile-icons/algoscan.svg" class="img-icon"/></span>
+              <Span class="font-semibold text-medium">View on Algoscan</Span>
+          </div>
+          <div class="modal-items-container" id="talewallet_support">
+              <span> <img src="../images/profile-icons/support.png" class="img-icon"/></span>
+              <Span class="font-semibold text-medium">Support</Span>
+          </div>
+          <div class="modal-items-container" id="account-details-btn">
+              <span><img src="../images/profile-icons/accountdetail.svg" class="img-icon"/></span>
+              <Span class="font-semibold text-medium">Account details</Span>
+          </div>
+          <div class="modal-items-container" id="e-kyc">
+              <span><img src="../images/profile-icons/Kyc.svg" class="img-icon"/></span>
+              <Span class="font-semibold text-medium">KYC</Span>
+          </div>
+       </div>
+      </div>
+        `
+    const accountDetailsModalHTML =`
+    <div class="profile-modal" id="profile-modal">
+    <div class="flex gap-10 px-10 items-center">
+      <span id="close-profile-modal">${backUi}</span>
+      <Span class="font-semibold text-medium">Profile</Span>
+    </div>
+    <div class="flex flex-col gap-10 px-10">
+        <div class="flex justify-center">
+            <img src="../images/profile.svg"  class="d-50 object-contain"/>
+        </div>
+        <div class="flex justify-center" id="qr-code">
+            
+        </div>
+        <div class = "flex gap-10 items-center box-shadow-1 wallet-address-container">
+            <div style=" overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address"></div>
+            <div  id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div>
+        </div>
+        <button class="btn primary-btn" id="view_on_algoscan">View on Algoscan</button>
+    </div>
 
-            document.getElementById('tlw_logout').innerHTML = '<a  id="logout_btn">Logout</a></span>';
-            var lbtn = document.getElementById('logout_btn');
-            lbtn.addEventListener('click', function () {
-                logout();
+</div>
+    
+    `
+
+
+function getValues() {
+  chrome.storage.local.get(["tale_wallet_address"], async function (result) {
+    console.log("Value currently is ", result);
+    var tale_wallet_address = result.tale_wallet_address;
+    console.log("wallet Address: " + tale_wallet_address);
+    let balance = getBalance(tale_wallet_address);
+    if (tale_wallet_address) {
+      //show account balance
+      document.getElementById("tale-wallet-headiong").innerHTML = `
+            <div class="flex justify-around items-center px-10">
+            <div>
+                <img src="../images/talewallet.svg" class="w-40 h-40 object-contain" />
+            </div>
+            <div class="py-10  px-30 border-slate border-radius-10">
+                    <span class="font-bold text-medium">Algorand</span>
+            </div>
+            <div id="profile-container" class="relative">
+                <img src="../images/profile.svg" class="w-40 h-40 object-contain" />
+            </div>
+            <div class="hidden" id="modal-container">
+                    
+                </div>
+        </div>
+            `;
+
+            // function generateQr(user_input) {
+            //     var qrcode = new QRCode(document.querySelector("#qr-code"), {
+            //         text: `${user_input.value}`,
+            //         width: 180, //default 128
+            //         height: 180,
+            //         colorDark : "#000000",
+            //         colorLight : "#ffffff",
+            //         correctLevel : QRCode.CorrectLevel.H
+            //     });
+            // }
+        
+        const modalContainer = document.getElementById("modal-container");
+
+        function addProfileModal(){
+            modalContainer.innerHTML = profileModalHTML
+            document.getElementById("lock-wallet").addEventListener("click",()=>{
+                document.getElementById("modal-container").classList.add("hidden");
+                logout()
+            })
+        
+                document.getElementById("account-details-btn").addEventListener("click",()=>{
+                    modalContainer.innerHTML = accountDetailsModalHTML
+                    // generateQr(tale_wallet_address)
+
+                    document.getElementById("tale_wallet_address").innerHTML = tale_wallet_address;
+                    document.getElementById("view_on_algoscan").addEventListener("click",()=>{
+                        window.open(`${ALGO_SCAN}/${tale_wallet_address}`)
+                    })
+        
+                    document.getElementById("close-profile-modal").addEventListener("click",()=>{
+                        addProfileModal();
+                    })
+        
+                })
+                document.getElementById("talewallet_support").addEventListener("click",()=>{
+                    window.open(`${talewallet_url}/support`)
+                  })
+                document.getElementById("e-kyc").addEventListener("click",()=>{
+                    window.open(`${talewallet_url}`)
+                  })
+              document.getElementById("view_on_algoscan").addEventListener("click",()=>{
+                window.open(`${ALGO_SCAN}/${tale_wallet_address}`)
+              })
+
+            document
+            .getElementById("close-profile-modal")
+            .addEventListener("click", () => {
+                modalContainer.classList.add("hidden");
             });
-            var copybtn = document.getElementById('copy_to_clipboard');
-            copybtn.addEventListener('click', function () {
-                copyToClipboard(tale_wallet_address);
-            });
-        } else {
-            createOrRecoverAccountUI();
         }
-    });
+
+        addProfileModal();
+        
+
+        const profileModal = document.getElementById("profile-modal")
+
+
+    
+
+      document
+        .getElementById("profile-container")
+        .addEventListener("click", () => {
+            modalContainer.classList.toggle("hidden");
+          
+        });
+        
+
+      document.getElementById("wallet_div").innerHTML = `
+            <div class="flex flex-col item-center gap-20">
+            <div class = "flex gap-10 items-center box-shadow-1 wallet-address-container">
+                <div>
+                    <img src="../images/ellipse.svg" class="w-40 h-40 object-contain" />
+                </div>
+                <div style=" overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address">  ${tale_wallet_address}</div>
+                <div  id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div>
+            </div>
+                
+                <div class="flex flex-col items-center">
+                    <div class="relative z-10">
+                        <img src="../images/algo.svg" class=" w-100 h-100object-contain" />
+                    </div>
+                    <div  id="wallet_balance" class="text-lg font-bold text-tale"> fetching ... </div>
+                </div>
+            <div class="flex gap-20">
+                <button class="btn primary-btn" id="buy-btn">Buy</button>
+                <button class="btn secondary-btn" id="sell-btn">Sell</button>
+            </div>
+            </div>
+                
+                `;
+    document.getElementById("buy-btn").addEventListener("click",()=>{
+        redirectToTalewalletWeb();
+    })
+
+      var copybtn = document.getElementById("copy_to_clipboard");
+      copybtn.addEventListener("click", function () {
+        copyToClipboard(tale_wallet_address);
+      });
+    } else {
+      createOrRecoverAccountUI();
+    }
+  });
 }
 
 function askPassPhrase(password){
@@ -186,110 +400,122 @@ function askPassPhrase(password){
         console.log([1,2,3,4,5,6])
         const propertyValues = Object.values(JSON.parse(res.secretKey));
         passphrase =   algosdk.secretKeyToMnemonic(propertyValues).split(" ");
+        // console.log(passphrase)
+        function getRandomNumber() {
+            return Math.floor(Math.random() * 25) + 1;
+          }
+          
+          let randomNumber1 = getRandomNumber();
+          let randomNumber2 = getRandomNumber();
+          let randomNumber3 = getRandomNumber();
+    
+          while (randomNumber1 === randomNumber2 || randomNumber2 === randomNumber3 || randomNumber1 === randomNumber3) {
+            randomNumber1 = getRandomNumber();
+            randomNumber2 = getRandomNumber();
+            randomNumber3 = getRandomNumber();
+          }
+
+          document.getElementById('wallet_div').innerHTML = `
+          <div class="flex flex-col gap-20">
+          <div class="text-start">
+              <button class="border-none" id ="back_to_password"> back</button>
+          </div>
+          <div>
+              <span class="text-xl font-bold text-tale">
+                  Enter your passphrase
+              </span>
+          </div>
+          <div class="flex flex-col gap-20">
+              <div class="flex flex-col gap-10 items-start">
+                  <span># no${randomNumber1} ${passphrase[randomNumber1-1]}</span>
+                  <div class="flex shadow-1 w-full  email-input-container">
+                      <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber1}" name="uname"
+                          id="passphrase_1" required>
+                  </div>
+              </div>
+              <div class="flex flex-col gap-10 items-start">
+                  <span># no${randomNumber2} ${passphrase[randomNumber2-1]}</span>
+                  <div class="flex shadow-1 w-full  email-input-container">
+                      <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber2}" name="uname"
+                          id="passphrase_2" required>
+                  </div>
+              </div>
+              <div class="flex flex-col gap-10 items-start">
+                  <span># no${randomNumber3} ${passphrase[randomNumber3-1]}</span>
+                  <div class="flex shadow-1 w-full  email-input-container">
+                      <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber3}" name="uname"
+                          id="passphrase_3" required>
+                  </div>
+              </div>
+          </div>
+          <div class="text-warning" id ="pass-warning"></div>
+          <button class="btn primary-btn" id="confirm_passphrase">
+              Continue
+          </button>
+      </div>
+          
+          `
+      document.getElementById("back_to_password").addEventListener("click",()=>{
+        setUpPassword();
+      })
+      const inputpass1 = document.getElementById("passphrase_1")
+      const inputpass2 = document.getElementById("passphrase_2")
+      const inputpass3 = document.getElementById("passphrase_3")
+      document.getElementById("confirm_passphrase").addEventListener("click",()=>{
+          if(inputpass1.value === passphrase[randomNumber1-1] && inputpass2.value === passphrase[randomNumber2-1] &&  inputpass3.value === passphrase[randomNumber3-1]){
+            chrome.storage.local.set({leftAt:"none"});
+            chrome.storage.local.set({localPassword:password});
+              getValues();
+          }else{
+              document.getElementById("pass-warning").innerHTML = `<span>wrong pass phrase</span>`
+          }
+      })
+
         
       });
 
 
-    function getRandomNumber() {
-        return Math.floor(Math.random() * 25) + 1;
-      }
-      
-      let randomNumber1 = getRandomNumber();
-      let randomNumber2 = getRandomNumber();
-      let randomNumber3 = getRandomNumber();
-
-      while (randomNumber1 === randomNumber2 || randomNumber2 === randomNumber3 || randomNumber1 === randomNumber3) {
-        randomNumber1 = getRandomNumber();
-        randomNumber2 = getRandomNumber();
-        randomNumber3 = getRandomNumber();
-      }
-
-    document.getElementById('wallet_div').innerHTML = `
-    <div class="flex flex-col gap-20">
-    <div class="text-start">
-        <button class="border-none" id ="back_to_password"> back</button>
-    </div>
-    <div>
-        <span class="text-xl font-bold text-tale">
-            Enter your passphrase
-        </span>
-    </div>
-    <div class="flex flex-col gap-20">
-        <div class="flex flex-col gap-10 items-start">
-            <span># no${randomNumber1}</span>
-            <div class="flex shadow-1 w-full  email-input-container">
-                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                    id="passphrase_1" required>
-            </div>
-        </div>
-        <div class="flex flex-col gap-10 items-start">
-            <span># no${randomNumber2}</span>
-            <div class="flex shadow-1 w-full  email-input-container">
-                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                    id="passphrase_2" required>
-            </div>
-        </div>
-        <div class="flex flex-col gap-10 items-start">
-            <span># no${randomNumber3}</span>
-            <div class="flex shadow-1 w-full  email-input-container">
-                <input type="text" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                    id="passphrase_3" required>
-            </div>
-        </div>
-    </div>
-    <div class="text-warning" id ="pass-warning"></div>
-    <button class="btn primary-btn" id="confirm_passphrase">
-        Continue
-    </button>
-</div>
     
-    `
-const inputpass1 = document.getElementById("passphrase_1")
-const inputpass2 = document.getElementById("passphrase_2")
-const inputpass3 = document.getElementById("passphrase_3")
-document.getElementById("confirm_passphrase").addEventListener("click",()=>{
-    if(inputpass1 === passphrase[randomNumber1+1] && inputpass2 === passphrase[randomNumber2+1] &&  inputpass3 === passphrase[randomNumber3+1]){
-        getValues();
-    }else{
-        document.getElementById("pass-warning").innerHTML = `<span>wrong pass phrase</span>`
-    }
-})
+
+   
 
 }
 
-function setUpPassword(){
-    document.getElementById('wallet_div').innerHTML = `
-    <div class="flex flex-col gap-40">
-    
-    <div class="font-bold text-tale text-xl">
-        Setup Your Password
-    </div>
+const passwordSetUpDiv = ` 
+  <div class="flex flex-col gap-40">
+
+     <div class="font-bold text-tale text-xl">
+       Setup Your Password
+     </div>
     <div class="flex flex-col items-start gap-10">
-        <span class="font-semibold text-medium">
-            Create password
-        </span>
-        <div class="flex shadow-1 w-full  email-input-container">
-            <input type="password" class="border-none outline-none mt-10" placeholder="Enter your password here" name="uname"
-                id="account_setup_password" required>
-        </div>
+       <span class="font-semibold text-medium">
+        Create password
+       </span>
+      <div class="flex shadow-1 w-full  email-input-container">
+          <input type="password" class="border-none outline-none mt-10" placeholder="Enter your password here" name="uname"
+            id="account_setup_password" required>
+       </div>
 
     </div>
     <div class="flex flex-col items-start gap-10">
-        <span class="font-semibold text-medium">
-            Repeat password
+       <span class="font-semibold text-medium">
+          Repeat password
         </span>
-        <div class="flex shadow-1 w-full  email-input-container">
+       <div class="flex shadow-1 w-full  email-input-container">
             <input type="password" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
-                id="account_setup_repeat_password" required>
+            id="account_setup_repeat_password" required>
         </div>
 
     </div>
     <div class="text-warning" id="password_warning" ></div>
     <button class="primary-btn btn" id="confirm_password">
-        Confirm password
+       Confirm password
     </button>
-</div>
-    `
+  </div>`
+
+
+function setUpPassword(){
+    document.getElementById('wallet_div').innerHTML = passwordSetUpDiv;
     const pass = document.getElementById("account_setup_password");
     const repeatPass = document.getElementById("account_setup_repeat_password")
     const passwordWarning = document.getElementById("password_warning")
@@ -302,6 +528,25 @@ function setUpPassword(){
         }
         else {
             askPassPhrase(pass.value)
+        }
+
+    })
+}
+
+function setUpCustodianPassword(){
+    document.getElementById('wallet_div').innerHTML = passwordSetUpDiv;
+    const pass = document.getElementById("account_setup_password");
+    const repeatPass = document.getElementById("account_setup_repeat_password")
+    const passwordWarning = document.getElementById("password_warning")
+
+    document.getElementById("confirm_password").addEventListener("click",()=>{
+        if(pass.value === repeatPass.value && pass.value.length < 8){
+                passwordWarning.innerHTML=`<span>Password length must be atleast of 8 character</span>`
+        }else if(pass.value !== repeatPass.value){
+            passwordWarning.innerHTML=`<span>Password and repeat password does not match.</span>`
+        }
+        else {
+            savePassphraseToServer();
         }
 
     })
@@ -327,30 +572,139 @@ function recoverAccountFromPassphrase(mnemonic){
 
 }
 
-function signupAndSaveCredentials(email, mnemonic, address) {
-    var api_url = 'https://bs-dev.api.onnftverse.com/v1/custodian/wallet/user/create';
-    var data_string = {
-        email: email,
-        seedPhrase: mnemonic,
-        address: address,
-        blokchain: 'ALGORAND'
-    };
-    // postAPICall(api_url, JSON.stringify(data_string));
+function requestOtp(email) {
     if(!validateEmail(email)){
         document.getElementById("sb_rb_error").innerHTML="<span>Email id is expected</span>"
     }
     else{
     chrome.storage.local.set({leftAt:"none"})
-    getValues()
+    // getValues()
+    let config = {
+        
+        method:"post",
+        headers:{
+            "X-App-Token": app_token,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            email:email
+        })
+    }
+   
+    fetch(`${NFTVERSE_DEV_API}/otp/send?type=login`,config).then(
+        (res) =>{
+            document.getElementById('email_address').disabled = true;
+            document.getElementById('request_otp_btn').style.display="none";
+            document.getElementById("input_otp").style.display="block";
+            document.getElementById("submit_otp_btn").style.display = "block"
+            document.getElementById("sb_rb_error").innerHTML=""
+        }
+        )
     }
 }
+
+ function setUpTaleWallet(){
+    chrome.storage.local.get(["authToken"],(res) =>{
+    let config = {
+        
+        method:"post",
+        headers:{
+            "X-Auth-Token": res.authToken,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            
+                blockchain: "ALGORAND",
+                wallet: "TALEWALLET",
+                marketplaceAddress: 0,
+            
+        })
+    }
+     fetch(`${BLOCKCHAIN_SERVICE}/user/blockchain/wallet/setup`,config)
+     .then(res => res.json())
+     .then(res =>{
+        chrome.storage.local.set({tale_wallet_address: res.address}, function() {
+            document.getElementById('wallet_div').innerHTML  = '';
+            getValues()
+        });
+     })
+     .catch(rej => console.log(rej))
+})
+    
+}
+
+async function loginWithOtp(){
+    chrome.storage.local.get(["authToken"],(res) =>{
+    let config = {
+        
+        method:"get",
+        headers:{
+            "X-Auth-Token": res.authToken ,
+            "Content-Type": "application/json",
+        }
+    }
+
+    fetch(`${BLOCKCHAIN_SERVICE}/user/blockchain/account?blockchain=ALGORAND`,config)
+    .then(res => res.json())
+    .then(res => {
+
+        const talewallet = res?.filter(wallet => wallet.wallet ==="TALEWALLET");
+        if(talewallet?.length === 0){
+          setUpTaleWallet();
+        }
+        else{
+        
+            chrome.storage.local.set({tale_wallet_address: talewallet[0].address}, function() {
+                document.getElementById('wallet_div').innerHTML  = '';
+                getValues()
+            });
+        }
+    }
+    )
+    .catch(rej => document.getElementById("sb_rb_error").innerHTML="<span>Having trouble getting account try again later</span>" )
+
+    
+
+})
+
+
+}
+
+
+function verifyOtp(email,otp){
+ if(!otp){
+    document.getElementById("sb_rb_error").innerHTML="<span>Otp is expected</span>"
+ }else{
+    let config = {
+        
+        method:"post",
+        headers:{
+            "X-App-Token": app_token,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            email:email,
+            otp:otp
+        })
+    }
+    fetch(`${NFTVERSE_DEV_API}/otp/verify?type=login`,config)
+    .then((res) =>  res.json())
+    .then(res => chrome.storage.local.set({authToken:res.authToken},()=>{
+            loginWithOtp();
+    }))
+    .catch(rej => document.getElementById("sb_rb_error").innerHTML="<span>Wrong otp</span>" )
+ }
+}
+
+
+
 function afterSignupAuccess(data) {
     //todo:
     document.getElementById('submit_rebuttal_div').innerHTML  = "<p style='color: green; font-weight: bold;'>Rebuttal submitted Successfully!</p>";
 }
 
-function savePassphraseToServer(mnemonic, address){
-    console.log(mnemonic)
+function setAccountWithEmail(){
+    // console.log(mnemonic)
     document.getElementById('wallet_div').innerHTML  =
         `       <div class="flex flex-col items-center gap-10">
             <div class="text-centre">
@@ -360,22 +714,36 @@ function savePassphraseToServer(mnemonic, address){
                     <label for="uname"><b>Enter your email address</b></label>
                     <div class="flex shadow-1 w-full  email-input-container">
                     <input type="text" class = "border-none outline-none mt-10" placeholder="Enter your email" name="uname" id="email_address" required>
-            </div>        
+            </div>  
+            <div class="flex shadow-1 w-full  email-input-container">
+                    <input type="text" class = "border-none outline-none mt-10 hidden" placeholder="Enter OTP received on your mail" name="uname" id="input_otp" required>
+            </div>       
         <span id="sb_rb_error" style="color:red"></span>
-                    <button type="submit"  id="sbt_email_btn" class="btn primary-btn mt-10">Submit</button>
+                    <button type="submit"  id="request_otp_btn" class="btn primary-btn mt-10">Request Otp</button>
+                    <button type="submit"  id="submit_otp_btn" class="btn primary-btn mt-10 hidden">Submit Otp</button>
         <div>In future you will be able to access your account using this email and OTP</div>
                 </div>`;
-    chrome.storage.local.set({leftAt:"email_verification"})
-    var link = document.getElementById('sbt_email_btn');
+    // chrome.storage.local.set({leftAt:"email_verification"})
+    const requestOtpBtn = document.getElementById('request_otp_btn');
+    const submitOtpBtn = document.getElementById("submit_otp_btn");
+    const email = document.getElementById('email_address')
+    const inputOtp = document.getElementById("input_otp")
     // onClick's logic below:
-    if(link) {
-        link.addEventListener('click', function () {
-            signupAndSaveCredentials(document.getElementById('email_address').value, mnemonic, address);
+    if(requestOtpBtn) {
+        requestOtpBtn.addEventListener('click', function () {
+            requestOtp(email.value);
         });
     }
+
+    submitOtpBtn.addEventListener("click",() =>verifyOtp(email.value,inputOtp.value))
     //todo: take users email and save this to server
 }
-function accountSetup(sk){
+
+
+
+
+
+function accountSetup(){
     document.getElementById(
         "wallet_div"
       ).innerHTML = `<div class="manage-account-details">
@@ -402,7 +770,8 @@ function accountSetup(sk){
       var lbtn = document.getElementById("confirm_btn");
       lbtn.hidden = !consent_checkbox.checked;
       lbtn.addEventListener("click", function () {
-        savePassphraseToServer(algosdk.secretKeyToMnemonic(sk));
+        // setUpCustodianPassword();
+        setAccountWithEmail();
       });
   
       var ncbtn = document.getElementById("noncustodian_confirmation");
@@ -410,12 +779,28 @@ function accountSetup(sk){
       ncbtn.addEventListener("click", function () {
         // chrome.storage.local.set({leftAt:"none"})
         // getValues();
-        setUpPassword()
+        
+         setUpPassword()
       });
       var dbtn = document.getElementById("download_passphrase");
       dbtn.addEventListener("click", function () {
         ncbtn.disabled = false;
-        downloadMnemonicFile(algosdk.secretKeyToMnemonic(sk));
+        let keys = algosdk.generateAccount();
+         chrome.storage.local.set({ leftAt: "account_creation" });
+        console.log(keys.sk);
+        chrome.storage.local.set({ secretKey: JSON.stringify(keys.sk) },()=>{
+            downloadMnemonicFile(algosdk.secretKeyToMnemonic(keys.sk));
+        });
+
+        chrome.storage.local.set(
+          { tale_wallet_address: keys.addr },
+          function () {
+            // console.log("Value is set to " + keys.addr);
+            // accountSetup(keys.sk);
+        
+          }
+        );
+        
       });
       consent_checkbox.addEventListener("change", (event) => {
         lbtn.hidden = !consent_checkbox.checked;
@@ -424,15 +809,15 @@ function accountSetup(sk){
       });
 }
 function createNewAccount(){
-  let keys = algosdk.generateAccount();
-  chrome.storage.local.set({ leftAt: "account_creation" });
-  console.log(keys.sk);
-  chrome.storage.local.set({ secretKey: JSON.stringify(keys.sk) });
+//   let keys = algosdk.generateAccount();
+//   chrome.storage.local.set({ leftAt: "account_creation" });
+//   console.log(keys.sk);
+//   chrome.storage.local.set({ secretKey: JSON.stringify(keys.sk) });
 
-  chrome.storage.local.set({ tale_wallet_address: keys.addr }, function () {
-    // console.log("Value is set to " + keys.addr);
-    accountSetup(keys.sk)
-  });
+//   chrome.storage.local.set({ tale_wallet_address: keys.addr }, function () {
+//     // console.log("Value is set to " + keys.addr);
+//     accountSetup(keys.sk)
+//   });
 }
 
 function recoverAccountUI() {
@@ -519,7 +904,7 @@ function createOrRecoverAccountUI() {
 
     // onClick's logic below:
     cbtn.addEventListener('click', function() {
-        showLoginUIUsingOTP();
+        setAccountWithEmail();
     });
     var rctn = document.getElementById('recover_btn');
 
@@ -529,7 +914,8 @@ function createOrRecoverAccountUI() {
     });
     var lbtn = document.getElementById('create_btn');
     lbtn.addEventListener('click', function() {
-        createNewAccount();
+        // createNewAccount();
+        accountSetup()
     });
 
 }
