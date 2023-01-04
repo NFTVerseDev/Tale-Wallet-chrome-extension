@@ -67,6 +67,12 @@ overflow: hidden;
     .w-100{
         width: 100px;
     }
+    .w-1000{
+        width: 1000px;
+    }
+    .w-50{
+        width: 50px;
+    }
     .h-100{
         height: 100px;
     }
@@ -88,16 +94,22 @@ overflow: hidden;
     .p-10{
         padding: 10px;
     }
+    .gap-5{
+        gap: 5px;
+    }
     .gap-20{
         gap: 20px;
     }
+
     .gap-100{
         gap:100px;
     }
     .text-center{
         text-align: center;
     }
-
+    .text-ellipsis{
+        text-overflow: ellipsis;
+    }
     .font-bold{
         font-weight: 600;
     }
@@ -355,6 +367,14 @@ overflow: hidden;
         }
     }
 
+    #buy-btn{
+        padding: 10px 0;
+        width: 80px;
+    }
+    #sell-btn{
+        padding: 10px 0;
+        width: 80px;
+    }
 #modal-container{
     width: 300px;
     height: 100%;
@@ -425,12 +445,57 @@ overflow: hidden;
     /* padding: 10px; */
     
 }
+#opt-in-option:disabled{
+    background: none;
+    color: #0c0c0c;
+}
 .wallet-address-container{
     /* border: 1px solid; */
     padding: 10px;
     border-radius: 10px;
     box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
 
+}
+.cursor-pointer{
+    cursor: pointer;
+}
+.token-container{
+    padding:10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    font-weight: bold;
+    align-items: center;
+    border: 1px solid rgb(176, 172, 172);
+    border-radius: 9000px;
+    width: 80%;
+}
+
+.overflow-x-scroll{
+    overflow-x: scroll;
+}
+.limit-words-overflow{
+    width: 100px;
+    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.activity-item-container{
+    margin: 5px;
+    padding: 10px;
+    --tw-bg-opacity: 1;
+    background-color: rgb(243 232 255/var(--tw-bg-opacity));
+    --tw-border-opacity: 1;
+    /* border-color: rgb(233 213 255/var(--tw-border-opacity)); */
+    border: 1px solid rgb(233 213 255/var(--tw-border-opacity));
+    width: 100%;
+    border-radius: 0.75rem;
+    align-items: center;
+    display: grid;
+    -webkit-box-shadow: 0 10px 6px -6px #777;
+	   -moz-box-shadow: 0 10px 6px -6px #777;
+	        box-shadow: 0 10px 6px -6px #777;
+    grid-template-columns: repeat(9,minmax(0,1fr));
 }
 body{
     border-radius: 40px;
@@ -538,6 +603,7 @@ ol{
 </style>
 
 <script src="../js/algosdk.min.js"></script>
+<script src="../js/crypto.js"></script>
 <script type="module" src="../js/contentscript.js">
 </script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
@@ -548,38 +614,21 @@ ol{
     <div  id="wallet_div"></div>
     <div style="text-align: left;" id="login_UI">
     </div>
-    <div class="flex flex-col gap-20" id="wallet_asset_div"></div>
+    <div class="flex flex-col gap-20 hidden" id="wallet_asset_div">
+        <div class="font-bold text-medium flex justify-between  relative  ">
+            <button class="activity-button activity-selected relative z-10" id="show-Nfts">NFTs </button>
+            <button class="activity-button relative left-10 z-10" id="show-token">Token </button>
+            <button class="activity-button relative " id ="show-activity">Activities </button>
+            <!-- <div class="activity-border"></div> -->
+         </div>
+        <div class=" flex flex-wrap justify-center gap-20" id="wallet_asset_container"></div>
+
+    </div>
 
 
 
 </div>
 
-<!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-<div id="qrcode"></div>
-<script type="text/javascript">
-new QRCode(document.getElementById("qrcode"), "https://webisora.com");
-</script> -->
 
 
-<!-- <div class="profile-modal" id="profile-modal">
-    <div class="flex gap-10 px-10 items-center">
-      <span id="close-profile-modal">${backUi}</span>
-      <Span class="font-semibold text-medium">Profile</Span>
-    </div>
-    <div class="flex flex-col gap-10 px-10">
-        <div class="flex justify-center">
-            <img src="../images/profile.svg"  class="d-50 object-contain"/>
-        </div>
-        <div class="flex justify-center">
-            <img src="../images/profile-icons/support.png"  class="d-150" />
-        </div>
-        <div class = "flex gap-10 items-center box-shadow-1 wallet-address-container">
-            <div style=" overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address">  ${tale_wallet_address}</div>
-            <div  id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div>
-        </div>
-        <button class="btn primary-btn">View on Algoscan</button>
-        <button class="btn secondary-btn">Export private key</button>
-    </div>
-
-</div> -->
 

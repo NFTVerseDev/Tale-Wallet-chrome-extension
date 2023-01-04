@@ -8,10 +8,7 @@
     "persistent": false
   },
   "permissions": [
-    "activeTab",
-    "tabs",
     "storage",
-    "identity",
     "https://bs-dev.api.onnftverse.com/*",
     "https://dev.talewallet.com/*"
   ],

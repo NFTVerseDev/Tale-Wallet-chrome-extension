@@ -1,6 +1,15 @@
-import {pinta_cloud,NFTVERSE_DEV_API,BLOCKCHAIN_SERVICE,MARKETPLACE_SERVICE,app_token,ALGO_SCAN,talewallet_url} from "./config.js";
+import {pinta_cloud,NFTVERSE_DEV_API,BLOCKCHAIN_SERVICE,MARKETPLACE_SERVICE,app_token,ALGO_SCAN_ACCOUNT,ALGO_SCAN_TRANSACTION,talewallet_url,tale_coin_token,algo_node} from "./config.js";
+import AlgorandClient from "./AlgorandClient.js";
 
-// import "https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"
+//encrypt and decrypt
+// var ciphertext = CryptoJS.AES.encrypt(JSON.stringify("my message"), 'secretKey').toString();
+// console.log(ciphertext)
+// console.log(CryptoJS.SHA256("Message").toString())
+// console.log(CryptoJS.SHA256("Message").toString())
+
+// let bytes = CryptoJS.AES.decrypt(ciphertext, 'secretKey');
+// const decryptedData = bytes.toString(CryptoJS.enc.Utf8) && JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -24,8 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
               });
         }
         else{
-            chrome.storage.local.get(["localPassword"], (res) => {
-                if(res.localPassword){
+            chrome.storage.local.get(["userCredentials"], (res) => {
+                
+                if(res.userCredentials){
+                    console.log(res.userCredentials)
                     loginWithPassword();
                 }else{
                     getValues();
@@ -61,19 +72,34 @@ function loginWithPassword(){
           <img src="../images/talewallet.png" alt="Avatar" class="avatar"/>
       </div>
       <div class="flex flex-col gap-10">
+      
       <div class="flex flex-col shadow-1 w-full  email-input-container">
-        <input type="text" class="border-none outline-none underline-none" placeholder="Enter your password" name="uname" id="input_login_password" required>
+        <input type="password" class="border-none outline-none underline-none" placeholder="Enter your password" name="uname" id="input_login_password" required>
       </div>
+     
       <span class="text-warning" id="login_warning"></span>
       <button class="btn primary-btn" id="submit_password" >Submit</button>
       </div>
       
     </div>
     `
+    // <button class="" id="toggle-pass-view">View Password</button>
     const inputLoginPassword = document.getElementById("input_login_password");
+
+    // const passView = document.getElementById("toggle-pass-view")
+    // passView.addEventListener("click",()=>{
+    //     inputLoginPassword.type==="text" ?
+    //      (() =>{
+    //         passView.innerHTML="View Password" 
+    //      inputLoginPassword.type="password"})():
+    //      (() =>{
+    //         passView.innerHTML="Hide Password" 
+    //      inputLoginPassword.type="text"
+    //      })()
+    // })
     document.getElementById("submit_password").onclick = ()=>{
-        chrome.storage.local.get(["localPassword"],(res)=>{
-            if(inputLoginPassword.value === res.localPassword){
+        chrome.storage.local.get(["userCredentials"],(res)=>{
+            if(CryptoJS.SHA256(inputLoginPassword.value).toString() === res.userCredentials.password){
             getClient();
             getValues();
             }else{
@@ -96,7 +122,7 @@ function logout() {
         // document.getElementById('tlw_logout').innerHTML = '';
         document.getElementById("tale-wallet-headiong").innerHTML ="Tale Wallet"
         
-        document.getElementById('wallet_asset_div').innerHTML = '';
+        document.getElementById('wallet_asset_div').classList.add("hidden");
         getValues();
     });
 }
@@ -148,20 +174,21 @@ async function showAssets(accountInfo){
         document.getElementById('wallet_asset_div').innerHTML  = '<div class="container" style="background-color:#f1f1f1; line-height: 2">No asset found</div>';
 
     } else {
-        var c  = `<div class="font-bold text-medium flex justify-between  relative  ">
-                     <button class="activity-button activity-selected relative z-10" id="show-Nfts">NFTs </button>
-                     <button class="activity-button relative left-10">Token </button>
-                     <button class="activity-button">Activities </button>
-                     <div class="activity-border"></div>
-                  </div>
-                    <div class=" flex flex-wrap justify-center gap-20"> `;
+        // var c  = `<div class="font-bold text-medium flex justify-between  relative  ">
+        //              <button class="activity-button activity-selected relative z-10" id="show-Nfts">NFTs </button>
+        //              <button class="activity-button relative left-10">Token </button>
+        //              <button class="activity-button">Activities </button>
+        //              <div class="activity-border"></div>
+        //           </div>
+        var c =           `<div class=" flex flex-wrap justify-center gap-20"> `;
         console.log(accountInfo['created-assets'])
         var assetobj = accountInfo['created-assets']
+        if(assetobj.length > 0) {
         for (const item in assetobj) {
             try {
             const asset = await fetchAssetDetails(assetobj[item]?.params?.url);
             
-            console.log(`key = ${item}, value = ${assetobj[item]["assetname"]}`);
+            // console.log(`key = ${item}, value = ${assetobj[item]["assetname"]}`);
             c = c + `<a href="https://testnet.talewallet.com/asset/${assetobj[item]?.index}" target="_blank">
             <div class="flex flex-col asset-container" >
             <div>
@@ -174,9 +201,413 @@ async function showAssets(accountInfo){
                     console.log(error)
             }
         }
-        document.getElementById('wallet_asset_div').innerHTML = c +"</div>";
+    }
+    else{
+        c= "<span>No Assets to show !!</span>"
+    }
+        document.getElementById('wallet_asset_div').classList.remove("hidden")
+        console.log(document.getElementById("wallet_asset_div"))
+        
+        document.getElementById("wallet_asset_container").innerHTML = c+ "</div>"
     }
 }
+
+
+//wallet asset functions to navigate
+
+//token
+
+
+
+ async function getTokens(){
+    
+    const client = await AlgorandClient;
+    chrome.storage.local.get(["tale_wallet_address"], async function(result){
+        let accountInfo = await client.accountInformation(result?.tale_wallet_address).do();
+        let accountAsset = accountInfo["created-assets"];
+
+        if (accountInfo["created-assets"] === undefined) {
+            accountAsset =[]
+            // document.getElementById('wallet_asset_div').innerHTML = '<div class="container" style="background-color:#f1f1f1; line-height: 2">No asset found</div>';
+        } else {
+           
+            var assetobj = accountInfo['created-assets']
+            let array = [];
+            let assetUrl = [];
+            for (const item in assetobj) {
+                array = ([...array, { key: assetobj[item].index, value: assetobj[item].params.name }])
+                assetUrl = ([...assetUrl, { key: assetobj[item].index, value: assetobj[item].params.url }])
+            }
+            accountAsset = (array);
+        }
+
+        let amount = accountInfo?.amount;
+        let array = [];
+        if(accountInfo.assets){
+            let assetsArray = accountInfo.assets;
+            let assetUrl = [];
+            assetsArray?.map((asset) => {
+                array = [...array, { key: asset['asset-id'], amount: asset.amount }]
+            })
+            
+        }
+
+        const optInAsset = (assetId) => {
+
+            chrome.storage.local.get(["userCredentials"],(res) =>{
+                console.log("in handle optin")
+
+            const waitForConfirmation = async function (AlgorandClient, txId) {
+                let response = await AlgorandClient.status().do();
+                let lastround = response["last-round"];
+                while (true) {
+                    const pendingInfo = await AlgorandClient.pendingTransactionInformation(txId).do();
+                    if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
+                        //Got the completed Transaction
+                        // console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+                        break;
+                    }
+                    lastround++;
+                    await AlgorandClient.statusAfterBlock(lastround).do();
+                }
+            };
+    
+    
+            // Function used to print created asset for account and assetid
+            const printCreatedAsset = async function (AlgorandClient, account, assetid) {
+                // note: if you have an indexer instance available it is easier to just use this
+                //     let accountInfo = await indexerClient.searchAccounts()
+                //    .assetID(assetIndex).do();
+                // and in the loop below use this to extract the asset for a particular account
+                // accountInfo['accounts'][idx][account]);
+                let accountInfo = await AlgorandClient.accountInformation(account).do();
+                for (let idx = 0; idx < accountInfo['created-assets'].length; idx++) {
+                    let scrutinizedAsset = accountInfo['created-assets'][idx];
+                    if (scrutinizedAsset['index'] == assetid) {
+                        // console.log("AssetID = " + scrutinizedAsset['index']);
+                        let myparms = JSON.stringify(scrutinizedAsset['params'], undefined, 2);
+                        // console.log("parms = " + myparms);
+                        break;
+                    }
+                }
+            };
+            // Function used to print asset holding for account and assetid
+            const printAssetHolding = async function (AlgorandClient, account, assetid) {
+                // note: if you have an indexer instance available it is easier to just use this
+                //     let accountInfo = await indexerClient.searchAccounts()
+                //    .assetID(assetIndex).do();
+                // and in the loop below use this to extract the asset for a particular account
+                // accountInfo['accounts'][idx][account]);
+                let accountInfo = await AlgorandClient.accountInformation(account).do();
+                for (let idx = 0; idx < accountInfo['assets'].length; idx++) {
+                    let scrutinizedAsset = accountInfo['assets'][idx];
+                    if (scrutinizedAsset['asset-id'] == assetid) {
+                        let myassetholding = JSON.stringify(scrutinizedAsset, undefined, 2);
+                        // console.log("assetholdinginfo = " + myassetholding);
+                        break;
+                    }
+                }
+            };
+            
+            // if (oldMnemonic?.length > 1) {
+            //     var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(appCtx.mnemonic), 'secretKey').toString();
+            //     let bytes = CryptoJS.AES.decrypt(ciphertext, 'secretKey');
+            //     decryptedData = bytes.toString(CryptoJS.enc.Utf8) && JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            // }
+                var bytes = CryptoJS.AES.decrypt(res.userCredentials.encryptedPassphrase, res.userCredentials.password);
+               const decryptedData = bytes.toString(CryptoJS.enc.Utf8) && JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+               console.log(decryptedData)
+           
+            // JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            var account3_mnemonic = decryptedData.join(" ");
+            var recoveredAccount3 = algosdk.mnemonicToSecretKey(account3_mnemonic);
+            
+    
+            (async () => {
+    
+                let note = undefined;
+                let assetID = parseInt(tale_coin_token);
+                // console.log(process.env.REACT_APP_TAIL_COIN_TOKEN);
+    
+                let params = await AlgorandClient.getTransactionParams().do();
+                //comment out the next two lines to use suggested fee
+                params.fee = 1000;
+                params.flatFee = true;
+    
+                let sender = recoveredAccount3.addr;
+                let recipient = sender;
+                // We set revocationTarget to undefined as 
+                // This is not a clawback operation
+                let revocationTarget = undefined;
+                // CloseReaminerTo is set to undefined as
+                // we are not closing out an asset
+                let closeRemainderTo = undefined;
+                // We are sending 0 assets
+                let amount = 0;
+    
+    
+                // signing and sending "txn" allows sender to begin accepting asset specified by creator and index
+                let opttxn = algosdk.makeAssetTransferTxnWithSuggestedParams(sender, recipient, closeRemainderTo, revocationTarget,
+                    amount, note, assetID, params);
+    
+                // Must be signed by the account wishing to opt in to the asset    
+                let rawSignedTxn = opttxn.signTxn(recoveredAccount3.sk);
+                let opttx = (await AlgorandClient.sendRawTransaction(rawSignedTxn).do());
+                // console.log("Transaction : " + opttx.txId);
+                // wait for transaction to be confirmed
+                await waitForConfirmation(AlgorandClient, opttx.txId);
+    
+                //You should now see the new asset listed in the account information
+                // console.log("Account 3 = " + recoveredAccount3.addr);
+                await printAssetHolding(AlgorandClient, recoveredAccount3.addr, assetID);
+                //////////
+                showTaleData();
+                document.getElementById("opt-in-error").innerHTML =""
+                document.getElementById("opt-in-option").innerHTML="opted"
+                document.getElementById("opt-in-option").disabled=true;
+            })().catch(e => {
+
+                // console.log(e);
+                // console.trace();
+                document.getElementById("opt-in-option").disabled=false
+                    document.getElementById("opt-in-option").innerHTML="opt in"
+                    document.getElementById("opt-in-error").innerHTML ='Your wallet should have atleast 0.451 ALGOS to opt In token and claim reward'
+                
+                // setOptInSuccessfull(false)
+            });
+        })
+    
+        }
+        const showTaleData = async () => {
+            console.log('showTaleData');
+            chrome.storage.local.get(["tale_wallet_address"],async (res) =>{
+            let accountInfo = await AlgorandClient.accountInformation(res.tale_wallet_address).do();
+            console.log(accountInfo);
+            // setAmount(accountInfo.amount / 1000000)
+    
+            // setAccountAsset(accountInfo["assets"]);
+            if (accountInfo["assets"] === undefined) {
+                // setAccountAsset([]);
+                // document.getElementById('wallet_asset_div').innerHTML = '<div class="container" style="background-color:#f1f1f1; line-height: 2">No asset found</div>';
+            } else {
+                // console.log(accountInfo['assets'])
+                var assetobj = accountInfo['assets']
+                let assetUrl = [];
+                // console.log();
+                assetobj?.map((asset) => {
+                    array = [...array, { key: asset['asset-id'], amount: asset.amount }]
+                })
+                // console.log(array);
+            }
+            const isassetIdPresent = array?.filter((assets) => {
+                return (assets.key === tale_coin_token)
+            })
+            if (isassetIdPresent?.length > 0) {
+                // setTaleAmount((isassetIdPresent[0]?.amount) / 100)
+                console.log((isassetIdPresent[0]?.amount) / 100)
+                document.getElementById("tale_amount").innerHTML = (isassetIdPresent[0]?.amount)/ 100
+                // console.log(isassetIdPresent);
+                // setOptInSuccessfull(false)
+                // setOptIn(true);
+            }
+            else {
+                // setOptIn(false)
+                console.log("false")
+            }
+        })
+    
+        }
+        
+        const handleOptIn = () => {
+            const isAssetIdPresent = array?.filter((asset) => { return asset.key === tale_coin_token });
+            if (isAssetIdPresent?.length === 0) {
+                try {
+                    optInAsset(tale_coin_token)
+                    document.getElementById("opt-in-option").disabled =true;
+                    document.getElementById("opt-in-option").innerHTML="opting ...."
+                }
+                catch {
+                    console.log("error occured")
+                    // setOptInSuccessfull(false)
+                    // toast.error('Your wallet should have atleast 0.451 ALGOS to opt In token and claim reward')
+                }
+                
+            }
+            else{
+                document.getElementById("opt-in-option").innerHTML="already opted"
+                document.getElementById("opt-in-option").disabled=true;
+            }
+        }
+
+        
+
+        const isAssetIdPresent = array?.filter((assets) => {
+            return (assets.key === tale_coin_token)
+
+        })
+            const taleAmount = ((isAssetIdPresent[0]?.amount) / 100)
+            console.log(isAssetIdPresent[0]?.amount)
+            document.getElementById("wallet_asset_container").innerHTML =`
+                <div class="token-container">
+                <div class="flex justify-center items-center gap-10">
+                <span>
+                <img src="../images/talewallet.svg" class="w-40 h-40 object-contain" />
+                </span>
+                <span id="tale_amount">${isNaN(taleAmount)  ? "" :taleAmount}</span>
+                <span>Tale</span>
+                </div>
+                <button class="cursor-pointer border-none " id = "opt-in-option">
+                </button>
+                </div>
+                <div class="text-warning" id="opt-in-error"></div>
+            `
+            
+            if (isAssetIdPresent?.length === 0) {
+                try {
+                    chrome.storage.local.get(["userCredentials"],(res) =>{
+                        if(res.userCredentials){
+                            // document.getElementById("opt-in-option").innerHTML ="<span>Opt-in</span>"
+                
+                            
+                            document.getElementById(
+                              "opt-in-option"
+                            ).disabled = false;
+                            document.getElementById("opt-in-option").innerHTML =
+                              "Opt-in";
+                        }
+                       })
+                
+                    
+                }
+                catch {
+                    console.log("error occured")
+                    // setOptInSuccessfull(false)
+                    // toast.error('Your wallet should have atleast 0.451 ALGOS to opt In token and claim reward')
+                }
+                
+            }
+            else{
+                document.getElementById("opt-in-option").innerHTML="already opted"
+                document.getElementById("opt-in-option").disabled=true;
+            }
+
+       chrome.storage.local.get(["userCredentials"],(res) =>{
+        if(res.userCredentials){
+            // document.getElementById("opt-in-option").innerHTML ="<span>Opt-in</span>"
+
+            document.getElementById("opt-in-option").addEventListener("click",() =>{
+                console.log("clicked")
+                    handleOptIn()
+            })
+        }
+       })
+    })
+    
+}
+
+
+
+//activities
+
+ async  function getActivitiesData(taleWalletAddress){
+    let response = await fetch(`${algo_node}/accounts/${taleWalletAddress}/transactions?limit=100`)
+    response = await response.json();
+    return response
+}
+
+ function getActivities(){
+    // const activitiesData = await getActivitiesData();
+    chrome.storage.local.get(["tale_wallet_address"],async function(res){
+        
+       const activitiesData = await getActivitiesData(res.tale_wallet_address)
+        const transactions = activitiesData.transactions;
+
+      try{ 
+        if(transactions?.length > 0){
+            console.log(transactions)
+            document.getElementById("wallet_asset_container").innerHTML = `
+            <div class="overflow-x-scroll">
+            <div class="w-1000 flex flex-col gap-5">
+                <div class="activity-item-container text-lg font-bold">
+                    <div>TXid</div>
+                    <div>Block</div>
+                    <div>Time</div>
+                    <div>Sender</div>
+                    <div></div>
+                    <div>Receiver</div>
+                    <div>Amount</div>
+                    <div>Fees</div>
+                    <div>Type</div>
+                </div>
+               ${transactions.map((transaction) => {
+                 return `<div class="activity-item-container font-bold">
+                    <a href="${ALGO_SCAN_TRANSACTION}/${transaction.id}" target="_blank">
+                    <div class="limit-words-overflow"> ${transaction.id}</div>
+                    
+                    </a>
+                    <span>${transaction["last-valid"]}</span>
+                    <span>${transaction["round-time"]}</span>
+                    <a href="${ALGO_SCAN_ACCOUNT}/${transaction.sender}" target="_blank">
+                      <div class="limit-words-overflow"> ${transaction.sender}</div>
+                    </a>
+                    <div>
+                      to
+                    </div>
+                    <a href="${ALGO_SCAN_ACCOUNT}/${transaction["asset-transfer-transaction"]?.receiver || transaction["payment-transaction"]?.receiver}" target="_blank">
+                       <div class="limit-words-overflow"> ${transaction["asset-transfer-transaction"]?.receiver || transaction["payment-transaction"]?.receiver}</div>
+                    </a>
+                    <span>
+                       ${transaction["asset-transfer-transaction"]?.amount/100 || transaction["payment-transaction"]?.amount/100 || 0}
+                    </span>
+                    <span>
+                      ${transaction.fee/1000000}
+                    </span>
+                    <span>${transaction["asset-transfer-transaction"] ?"Opt in" : "Transfer"}</span>
+                </div>`;
+               }).join("")}
+            </div>
+        </div>`
+      }
+
+      else{
+        document.getElementById("wallet_asset_container").innerHTML =`<span>No transaction yet !!</span>`
+      }
+
+    }catch(error){
+        console.log(error)
+    }
+        
+    })
+
+}
+
+
+
+// wallet asset navigation buttons 
+document.getElementById("show-token").addEventListener("click",()=>{
+    document.getElementById("show-token").classList.add("activity-selected")
+    document.getElementById("show-Nfts").classList.remove("activity-selected")
+    document.getElementById("show-activity").classList.remove("activity-selected")
+    getTokens();
+})
+
+document.getElementById("show-Nfts").addEventListener("click",()=>{
+    document.getElementById("show-token").classList.remove("activity-selected")
+    document.getElementById("show-Nfts").classList.add("activity-selected")
+    document.getElementById("show-activity").classList.remove("activity-selected")
+    getValues();
+})
+
+document.getElementById("show-activity").addEventListener("click",()=>{
+    document.getElementById("show-token").classList.remove("activity-selected")
+    document.getElementById("show-Nfts").classList.remove("activity-selected")
+    document.getElementById("show-activity").classList.add("activity-selected")
+    getActivities();
+})
+
+
+
+
 async function getClient(){
     const token = "ef920e2e7e002953f4b29a8af720efe8e4ecc75ff102b165e0472834b25832c1";
     const server = "http://hackathon.algodev.network";
@@ -262,6 +693,7 @@ function validateEmail(email) {
     `
 
 
+
 function getValues() {
   chrome.storage.local.get(["tale_wallet_address"], async function (result) {
     console.log("Value currently is ", result);
@@ -313,7 +745,7 @@ function getValues() {
 
                     document.getElementById("tale_wallet_address").innerHTML = tale_wallet_address;
                     document.getElementById("view_on_algoscan").addEventListener("click",()=>{
-                        window.open(`${ALGO_SCAN}/${tale_wallet_address}`)
+                        window.open(`${ALGO_SCAN_ACCOUNT}/${tale_wallet_address}`)
                     })
         
                     document.getElementById("close-profile-modal").addEventListener("click",()=>{
@@ -328,7 +760,7 @@ function getValues() {
                     window.open(`${talewallet_url}`)
                   })
               document.getElementById("view_on_algoscan").addEventListener("click",()=>{
-                window.open(`${ALGO_SCAN}/${tale_wallet_address}`)
+                window.open(`${ALGO_SCAN_ACCOUNT}/${tale_wallet_address}`)
               })
 
             document
@@ -366,11 +798,11 @@ function getValues() {
                 
                 <div class="flex flex-col items-center">
                     <div class="relative z-10">
-                        <img src="../images/algo.svg" class=" w-100 h-100object-contain" />
+                        <img src="../images/algo.svg" class=" w-50 h-100object-contain" />
                     </div>
                     <div  id="wallet_balance" class="text-lg font-bold text-tale"> fetching ... </div>
                 </div>
-            <div class="flex gap-20">
+            <div class="flex gap-20 justify-center">
                 <button class="btn primary-btn" id="buy-btn">Buy</button>
                 <button class="btn secondary-btn" id="sell-btn">Sell</button>
             </div>
@@ -380,7 +812,9 @@ function getValues() {
     document.getElementById("buy-btn").addEventListener("click",()=>{
         redirectToTalewalletWeb();
     })
-
+    document.getElementById("sell-btn").addEventListener("click",()=>{
+        redirectToTalewalletWeb();
+    })
       var copybtn = document.getElementById("copy_to_clipboard");
       copybtn.addEventListener("click", function () {
         copyToClipboard(tale_wallet_address);
@@ -391,15 +825,31 @@ function getValues() {
   });
 }
 
-function askPassPhrase(password){
+async function askPassPhrase(password){
+    // const encryptedData = await encrypt(password)
+    // console.log(encryptedData)
 
     let passphrase;
     chrome.storage.local.get(["secretKey"], (res) => {
             
+        
+        
             
         console.log([1,2,3,4,5,6])
         const propertyValues = Object.values(JSON.parse(res.secretKey));
         passphrase =   algosdk.secretKeyToMnemonic(propertyValues).split(" ");
+        var ciphertext = CryptoJS.AES.encrypt(
+            JSON.stringify(passphrase),
+            CryptoJS.SHA256(password).toString()
+          ).toString();
+
+          console.log(ciphertext)
+        //   let bytes = CryptoJS.AES.decrypt(ciphertext, password);
+        //   const decryptedData =
+        //   bytes.toString(CryptoJS.enc.Utf8) &&
+        //   JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        //   console.log(decryptedData)
+
         // console.log(passphrase)
         function getRandomNumber() {
             return Math.floor(Math.random() * 25) + 1;
@@ -427,21 +877,21 @@ function askPassPhrase(password){
           </div>
           <div class="flex flex-col gap-20">
               <div class="flex flex-col gap-10 items-start">
-                  <span># no${randomNumber1} ${passphrase[randomNumber1-1]}</span>
+                  <span># no${randomNumber1}</span>
                   <div class="flex shadow-1 w-full  email-input-container">
                       <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber1}" name="uname"
                           id="passphrase_1" required>
                   </div>
               </div>
               <div class="flex flex-col gap-10 items-start">
-                  <span># no${randomNumber2} ${passphrase[randomNumber2-1]}</span>
+                  <span># no${randomNumber2} </span>
                   <div class="flex shadow-1 w-full  email-input-container">
                       <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber2}" name="uname"
                           id="passphrase_2" required>
                   </div>
               </div>
               <div class="flex flex-col gap-10 items-start">
-                  <span># no${randomNumber3} ${passphrase[randomNumber3-1]}</span>
+                  <span># no${randomNumber3} </span>
                   <div class="flex shadow-1 w-full  email-input-container">
                       <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber3}" name="uname"
                           id="passphrase_3" required>
@@ -462,9 +912,13 @@ function askPassPhrase(password){
       const inputpass2 = document.getElementById("passphrase_2")
       const inputpass3 = document.getElementById("passphrase_3")
       document.getElementById("confirm_passphrase").addEventListener("click",()=>{
+        
           if(inputpass1.value === passphrase[randomNumber1-1] && inputpass2.value === passphrase[randomNumber2-1] &&  inputpass3.value === passphrase[randomNumber3-1]){
+            
             chrome.storage.local.set({leftAt:"none"});
-            chrome.storage.local.set({localPassword:password});
+            chrome.storage.local.set({userCredentials:{password:CryptoJS.SHA256(password).toString(),encryptedPassphrase:ciphertext}},(res) =>{
+                console.log(res);
+            });
               getValues();
           }else{
               document.getElementById("pass-warning").innerHTML = `<span>wrong pass phrase</span>`
@@ -565,9 +1019,31 @@ function downloadMnemonicFile(mnemonic) {
 
 function recoverAccountFromPassphrase(mnemonic){
     var keys = algosdk.mnemonicToSecretKey(mnemonic);
-    chrome.storage.local.set({tale_wallet_address: keys.addr}, function() {
-        document.getElementById('wallet_div').innerHTML  = '';
-        getValues()
+    
+        document.getElementById('wallet_div').innerHTML = passwordSetUpDiv;
+    const pass = document.getElementById("account_setup_password");
+    const repeatPass = document.getElementById("account_setup_repeat_password")
+    const passwordWarning = document.getElementById("password_warning")
+    console.log(document.getElementById("confirm_password"))
+    document.getElementById("confirm_password").addEventListener("click",()=>{
+        if(pass.value === repeatPass.value && pass.value.length < 8){
+                passwordWarning.innerHTML=`<span>Password length must be atleast of 8 character</span>`
+        }else if(pass.value !== repeatPass.value){
+            passwordWarning.innerHTML=`<span>Password and repeat password does not match.</span>`
+        }
+        else {
+            chrome.storage.local.set({tale_wallet_address: keys.addr}, function() {
+            var ciphertext = CryptoJS.AES.encrypt(
+                JSON.stringify(mnemonic),
+                CryptoJS.SHA256(pass.value).toString()
+              ).toString();
+
+              chrome.storage.local.set({userCredentials:{password:CryptoJS.SHA256(pass.value).toString(),encryptedPassphrase:ciphertext}},(res) =>{
+                getValues();
+            });
+        })
+            
+        }
     });
 
 }
