@@ -6,6 +6,19 @@ chrome.commands.onCommand.addListener(function(command) {
   console.log('onCommand event received for message: ', command);
 });
 
+
+
+// function invokeExtension() {
+//   // Send a message to the extension
+//   chrome.runtime.sendMessage({ greeting: "hello" }, function(response) {
+//     console.log(response.farewell);
+//   });
+// }
+// invokeExtension();
+
+
+
+
 // chrome.browserAction.onClicked.addListener(function(tab) {
 //     // No tabs or host permissions needed!
 //     alert(tab.url);

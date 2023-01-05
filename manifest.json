@@ -2,17 +2,21 @@
   "name": "Tale Wallet",
   "description": "Bharat's own crypto wallet.",
   "version": "0.1",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "background": {
-    "scripts": ["js/background.js"],
-    "persistent": false
+    "service_worker": "js/background.js"
+   
   },
   "permissions": [
-    "storage",
+    "tabs",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
     "https://bs-dev.api.onnftverse.com/*",
     "https://dev.talewallet.com/*"
   ],
-  "browser_action": {
+  "action": {
     "default_popup": "views/browser_action.html"
   },
   "icons": {
@@ -22,10 +26,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://news.google.com/*"],
+      "matches": ["<all_urls>"],
       "js" : ["js/contentscript.js"]
     }
   ],
+  "externally_connectable":{
+    "matches":["https://www.talewallet.com/"]
+  },
   "commands": {
     "toggle-feature": {
       "suggested_key": {

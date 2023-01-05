@@ -10,6 +10,12 @@ import AlgorandClient from "./AlgorandClient.js";
 // let bytes = CryptoJS.AES.decrypt(ciphertext, 'secretKey');
 // const decryptedData = bytes.toString(CryptoJS.enc.Utf8) && JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 
+    // chrome.runtime.onMessage.addListener((obj,sender,response)=>{
+    //     console.log(obj)
+    //     console.log("hi")
+    // })
+    
+
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -48,9 +54,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // getValues();
     
-
+    
     
 });
+
+
 
 
 const backUi = `
@@ -76,6 +84,7 @@ function loginWithPassword(){
       <div class="flex flex-col shadow-1 w-full  email-input-container">
         <input type="password" class="border-none outline-none underline-none" placeholder="Enter your password" name="uname" id="input_login_password" required>
       </div>
+      <button class="border-none cursor-pointer" id="create-or-recover">create or recover account</button>
      
       <span class="text-warning" id="login_warning"></span>
       <button class="btn primary-btn" id="submit_password" >Submit</button>
@@ -84,6 +93,8 @@ function loginWithPassword(){
     </div>
     `
     // <button class="" id="toggle-pass-view">View Password</button>
+    document.getElementById("create-or-recover").addEventListener("click",logout)
+    
     const inputLoginPassword = document.getElementById("input_login_password");
 
     // const passView = document.getElementById("toggle-pass-view")
@@ -316,11 +327,20 @@ async function showAssets(accountInfo){
             // }
                 var bytes = CryptoJS.AES.decrypt(res.userCredentials.encryptedPassphrase, res.userCredentials.password);
                const decryptedData = bytes.toString(CryptoJS.enc.Utf8) && JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-               console.log(decryptedData)
+               console.log(typeof decryptedData)
+               //TODO: check if array then join else go direclty;
            
             // JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-            var account3_mnemonic = decryptedData.join(" ");
+            var account3_mnemonic;
+            if(typeof decryptedData === "string"){
+                account3_mnemonic=decryptedData;
+            }else{
+                account3_mnemonic = decryptedData.join(" ");
+            }
+            
             var recoveredAccount3 = algosdk.mnemonicToSecretKey(account3_mnemonic);
+
+            
             
     
             (async () => {
@@ -941,6 +961,12 @@ const passwordSetUpDiv = `
      <div class="font-bold text-tale text-xl">
        Setup Your Password
      </div>
+     <div class="flex justify-start">
+     <button class="border-none cursor-pointer" id="back-to-login">
+           Back
+     </button>
+     </div>
+    <div class="flex flex-col gap-20">
     <div class="flex flex-col items-start gap-10">
        <span class="font-semibold text-medium">
         Create password
@@ -965,11 +991,13 @@ const passwordSetUpDiv = `
     <button class="primary-btn btn" id="confirm_password">
        Confirm password
     </button>
+    </div>
   </div>`
 
 
 function setUpPassword(){
     document.getElementById('wallet_div').innerHTML = passwordSetUpDiv;
+    document.getElementById("back-to-login").addEventListener("click",logout)
     const pass = document.getElementById("account_setup_password");
     const repeatPass = document.getElementById("account_setup_repeat_password")
     const passwordWarning = document.getElementById("password_warning")
