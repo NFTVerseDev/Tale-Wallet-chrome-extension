@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(res.userCredentials){
                     console.log(res.userCredentials)
                     loginWithPassword();
-                }else{
+                }
+                else{
                     getValues();
                 }
             })
@@ -77,14 +78,16 @@ function loginWithPassword(){
     document.getElementById('wallet_div').innerHTML = `
     <div class="flex flex-col gap-100">
       <div>
-          <img src="../images/talewallet.png" alt="Avatar" class="avatar"/>
+          <img src="../images/talewallet.svg" alt="Avatar" class="avatar"/>
       </div>
       <div class="flex flex-col gap-10">
       
       <div class="flex flex-col shadow-1 w-full  email-input-container">
         <input type="password" class="border-none outline-none underline-none" placeholder="Enter your password" name="uname" id="input_login_password" required>
       </div>
-      <button class="border-none cursor-pointer" id="create-or-recover">create or recover account</button>
+      <div>
+      Forgot password ? <a class="border-none cursor-pointer" id="create-or-recover"> click here </a>
+      </div>
      
       <span class="text-warning" id="login_warning"></span>
       <button class="btn primary-btn" id="submit_password" >Submit</button>
@@ -168,7 +171,7 @@ async function getBalance(addr) {
 
 const fetchAssetDetails= async (url) =>{
 
- const response = await fetch(url)
+ const response = await fetch(`${pinta_cloud}/${url}`)
  const data = await response.json();
  console.log(data)
  return data
@@ -197,13 +200,15 @@ async function showAssets(accountInfo){
         if(assetobj.length > 0) {
         for (const item in assetobj) {
             try {
-            const asset = await fetchAssetDetails(assetobj[item]?.params?.url);
+             const asset = await fetchAssetDetails(assetobj[item]?.params?.url?.split("/")[2]);
+
+             const imageSrc = asset?.mime_type?.includes("image") ? `${pinta_cloud}/${asset?.image?.split("/")[2]}` : "../images/talecoin.png"
             
             // console.log(`key = ${item}, value = ${assetobj[item]["assetname"]}`);
             c = c + `<a href="https://testnet.talewallet.com/asset/${assetobj[item]?.index}" target="_blank">
             <div class="flex flex-col asset-container" >
             <div>
-                <img src= "${pinta_cloud}/${asset?.ipfsHash}" class ="asset-image" />
+                <img src= ${imageSrc} class ="asset-image" />
             </div>
             <div class="break-word"> ${assetobj[item]?.params?.name} </div>
             </div>
@@ -217,10 +222,12 @@ async function showAssets(accountInfo){
         c= "<span>No Assets to show !!</span>"
     }
         document.getElementById('wallet_asset_div').classList.remove("hidden")
-        console.log(document.getElementById("wallet_asset_div"))
-        
         document.getElementById("wallet_asset_container").innerHTML = c+ "</div>"
     }
+    document.getElementById("show-token").classList.remove("activity-selected")
+    document.getElementById("show-Nfts").classList.add("activity-selected")
+    document.getElementById("show-activity").classList.remove("activity-selected")
+
 }
 
 
@@ -437,6 +444,35 @@ async function showAssets(accountInfo){
         })
     
         }
+
+        const showTransactions = (taleAmount) =>{
+            
+            document.getElementById("wallet_div").innerHTML = `
+            <div class="flex flex-col gap-10 items-center" >
+                <div class="flex justify-start w-full">
+                     <button class="border-none" id="back">${backUi}</button>
+                </div>
+                <img src="../images/talecoin.png" class="w-100 object"/>
+                <div class="flex justify-center gap-10 text-lg font-bold">
+                <span>${isNaN(taleAmount)  ? "" :taleAmount}</span>
+                <span class="text-tale">Tale</span>
+                </div>
+                <div class="flex flex-col gap-10 w-full">
+                      <div class="py-10 w-full border-b-g">Activity</div>  
+                </div>
+
+            </div>
+            `
+            const activitiesDiv = document.createElement("div")
+            activitiesDiv.id="wallet_asset_container"
+            document.getElementById("wallet_div").append(activitiesDiv);
+
+            document.getElementById("back").addEventListener("click",()=>{
+                getValues();
+            })
+            getActivities()
+
+        }
         
         const handleOptIn = () => {
             const isAssetIdPresent = array?.filter((asset) => { return asset.key === tale_coin_token });
@@ -468,24 +504,31 @@ async function showAssets(accountInfo){
             const taleAmount = ((isAssetIdPresent[0]?.amount) / 100)
             console.log(isAssetIdPresent[0]?.amount)
             document.getElementById("wallet_asset_container").innerHTML =`
-                <div class="token-container">
-                <div class="flex justify-center items-center gap-10">
+            <div class="flex flex-col items-center w-full">
+                <div class="token-container cursor-pointer" id="show-transactions">
+                <div class="flex justify-center items-center gap-10" >
                 <span>
-                <img src="../images/talewallet.svg" class="w-40 h-40 object-contain" />
+                <img src="../images/talecoin.png" class="w-40 h-40 object-contain" />
                 </span>
                 <span id="tale_amount">${isNaN(taleAmount)  ? "" :taleAmount}</span>
                 <span>Tale</span>
                 </div>
-                <button class="cursor-pointer border-none " id = "opt-in-option">
+                <button class="cursor-pointer border-none" id="opt-in-option">
                 </button>
                 </div>
                 <div class="text-warning" id="opt-in-error"></div>
+            </div>    
             `
+            document.getElementById("show-transactions").addEventListener("click",() =>{
+                document.getElementById("wallet_asset_div").classList.add("hidden")
+                showTransactions(taleAmount)
+
+            })
             
             if (isAssetIdPresent?.length === 0) {
                 try {
                     chrome.storage.local.get(["userCredentials"],(res) =>{
-                        if(res.userCredentials){
+                        if(res.userCredentials.encryptedPassphrase !==""){
                             // document.getElementById("opt-in-option").innerHTML ="<span>Opt-in</span>"
                 
                             
@@ -515,7 +558,8 @@ async function showAssets(accountInfo){
         if(res.userCredentials){
             // document.getElementById("opt-in-option").innerHTML ="<span>Opt-in</span>"
 
-            document.getElementById("opt-in-option").addEventListener("click",() =>{
+            document.getElementById("opt-in-option").addEventListener("click",(e) =>{
+                e.stopPropagation();
                 console.log("clicked")
                     handleOptIn()
             })
@@ -702,7 +746,7 @@ function validateEmail(email) {
             
         </div>
         <div class = "flex gap-10 items-center box-shadow-1 wallet-address-container">
-            <div style=" overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address"></div>
+            <div style=" overflow: hidden; text-overflow: ellipsis;"  id="tale_wallet_address"></div>
             <div  id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div>
         </div>
         <button class="btn primary-btn" id="view_on_algoscan">View on Algoscan</button>
@@ -721,14 +765,15 @@ function getValues() {
     console.log("wallet Address: " + tale_wallet_address);
     let balance = getBalance(tale_wallet_address);
     if (tale_wallet_address) {
-      //show account balance
+      //show account balanceshow-token
       document.getElementById("tale-wallet-headiong").innerHTML = `
-            <div class="flex justify-around items-center px-10">
+            <div class="flex justify-between items-center">
             <div>
-                <img src="../images/talewallet.svg" class="w-40 h-40 object-contain" />
+                <img src="../images/talewallet.png" class="w-40 h-40 object-contain" />
             </div>
-            <div class="py-10  px-30 border-slate border-radius-10">
-                    <span class="font-bold text-medium">Algorand</span>
+            <div class="flex items-center border-slate border-radius-10 gap-10 px-10">
+                    <img src="../images/testnet.png" class=" h-15 object-contain" />
+                    <span class="font-bold text-medium">Testnet</span>
             </div>
             <div id="profile-container" class="relative">
                 <img src="../images/profile.svg" class="w-40 h-40 object-contain" />
@@ -807,12 +852,12 @@ function getValues() {
         
 
       document.getElementById("wallet_div").innerHTML = `
-            <div class="flex flex-col item-center gap-20">
-            <div class = "flex gap-10 items-center box-shadow-1 wallet-address-container">
+            <div class="flex flex-col items-center gap-20">
+            <div class = "flex justify-between items-center box-shadow-1 w-80p wallet-address-container">
                 <div>
                     <img src="../images/ellipse.svg" class="w-40 h-40 object-contain" />
                 </div>
-                <div style=" overflow: hidden; text-overflow: ellipsis;" id="tale_wallet_address">  ${tale_wallet_address}</div>
+                <div style=" overflow: hidden; text-overflow: ellipsis;" class="w-100 font-bold" id="tale_wallet_address">  ${tale_wallet_address}</div>
                 <div  id="copy_to_clipboard"> <img src="../images/copy.png" alt="Copy Address" width="25" /> </div>
             </div>
                 
@@ -824,7 +869,7 @@ function getValues() {
                 </div>
             <div class="flex gap-20 justify-center">
                 <button class="btn primary-btn" id="buy-btn">Buy</button>
-                <button class="btn secondary-btn" id="sell-btn">Sell</button>
+                <button class="btn hidden secondary-btn" id="sell-btn">Sell</button>
             </div>
             </div>
                 
@@ -897,21 +942,21 @@ async function askPassPhrase(password){
           </div>
           <div class="flex flex-col gap-20">
               <div class="flex flex-col gap-10 items-start">
-                  <span># no${randomNumber1}</span>
+                  <span class="font-bold"># ${randomNumber1}</span>
                   <div class="flex shadow-1 w-full  email-input-container">
                       <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber1}" name="uname"
                           id="passphrase_1" required>
                   </div>
               </div>
               <div class="flex flex-col gap-10 items-start">
-                  <span># no${randomNumber2} </span>
+                  <span class="font-bold"># ${randomNumber2} </span>
                   <div class="flex shadow-1 w-full  email-input-container">
                       <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber2}" name="uname"
                           id="passphrase_2" required>
                   </div>
               </div>
               <div class="flex flex-col gap-10 items-start">
-                  <span># no${randomNumber3} </span>
+                  <span class="font-bold"># ${randomNumber3} </span>
                   <div class="flex shadow-1 w-full  email-input-container">
                       <input type="text" class="border-none outline-none mt-10" placeholder="Passphrase no ${randomNumber3}" name="uname"
                           id="passphrase_3" required>
@@ -947,12 +992,6 @@ async function askPassPhrase(password){
 
         
       });
-
-
-    
-
-   
-
 }
 
 const passwordSetUpDiv = ` 
@@ -963,7 +1002,7 @@ const passwordSetUpDiv = `
      </div>
      <div class="flex justify-start">
      <button class="border-none cursor-pointer" id="back-to-login">
-           Back
+           ${backUi}
      </button>
      </div>
     <div class="flex flex-col gap-20">
@@ -979,10 +1018,10 @@ const passwordSetUpDiv = `
     </div>
     <div class="flex flex-col items-start gap-10">
        <span class="font-semibold text-medium">
-          Repeat password
+          Confirm password
         </span>
        <div class="flex shadow-1 w-full  email-input-container">
-            <input type="password" class="border-none outline-none mt-10" placeholder="Repeat your password to confirm" name="uname"
+            <input type="password" class="border-none outline-none mt-10" placeholder="Confirm your password" name="uname"
             id="account_setup_repeat_password" required>
         </div>
 
@@ -1049,6 +1088,8 @@ function recoverAccountFromPassphrase(mnemonic){
     var keys = algosdk.mnemonicToSecretKey(mnemonic);
     
         document.getElementById('wallet_div').innerHTML = passwordSetUpDiv;
+    
+        document.getElementById("back-to-login").addEventListener("click",logout)
     const pass = document.getElementById("account_setup_password");
     const repeatPass = document.getElementById("account_setup_repeat_password")
     const passwordWarning = document.getElementById("password_warning")
@@ -1062,7 +1103,7 @@ function recoverAccountFromPassphrase(mnemonic){
         else {
             chrome.storage.local.set({tale_wallet_address: keys.addr}, function() {
             var ciphertext = CryptoJS.AES.encrypt(
-                JSON.stringify(mnemonic),
+                JSON.stringify(mnemonic || ""),
                 CryptoJS.SHA256(pass.value).toString()
               ).toString();
 
@@ -1099,7 +1140,7 @@ function requestOtp(email) {
         (res) =>{
             document.getElementById('email_address').disabled = true;
             document.getElementById('request_otp_btn').style.display="none";
-            document.getElementById("input_otp").style.display="block";
+            document.getElementById("otp-container").classList.remove("hidden");
             document.getElementById("submit_otp_btn").style.display = "block"
             document.getElementById("sb_rb_error").innerHTML=""
         }
@@ -1160,7 +1201,8 @@ async function loginWithOtp(){
         
             chrome.storage.local.set({tale_wallet_address: talewallet[0].address}, function() {
                 document.getElementById('wallet_div').innerHTML  = '';
-                getValues()
+                passWordSetupforOtpLogin();
+                // getValues()
             });
         }
     }
@@ -1172,6 +1214,29 @@ async function loginWithOtp(){
 })
 
 
+}
+function passWordSetupforOtpLogin(){
+    document.getElementById('wallet_div').innerHTML = passwordSetUpDiv;
+    
+    document.getElementById("back-to-login").addEventListener("click",logout)
+const pass = document.getElementById("account_setup_password");
+const repeatPass = document.getElementById("account_setup_repeat_password")
+const passwordWarning = document.getElementById("password_warning")
+console.log(document.getElementById("confirm_password"))
+document.getElementById("confirm_password").addEventListener("click",()=>{
+    if(pass.value === repeatPass.value && pass.value.length < 8){
+            passwordWarning.innerHTML=`<span>Password length must be atleast of 8 character</span>`
+    }else if(pass.value !== repeatPass.value){
+        passwordWarning.innerHTML=`<span>Password and repeat password does not match.</span>`
+    }
+    else {
+          chrome.storage.local.set({userCredentials:{password:CryptoJS.SHA256(pass.value).toString(),encryptedPassphrase:""}},(res) =>{
+            getValues();
+       
+    })
+        
+    }
+});
 }
 
 
@@ -1212,15 +1277,15 @@ function setAccountWithEmail(){
     document.getElementById('wallet_div').innerHTML  =
         `       <div class="flex flex-col items-center gap-10">
             <div class="text-centre">
-                    <img src="../images/talewallet.svg" class="avatar" />
+                    <img src="../images/talewallet.png" class="avatar" />
 
                     </div>
                     <label for="uname"><b>Enter your email address</b></label>
                     <div class="flex shadow-1 w-full  email-input-container">
                     <input type="text" class = "border-none outline-none mt-10" placeholder="Enter your email" name="uname" id="email_address" required>
             </div>  
-            <div class="flex shadow-1 w-full  email-input-container">
-                    <input type="text" class = "border-none outline-none mt-10 hidden" placeholder="Enter OTP received on your mail" name="uname" id="input_otp" required>
+            <div class="flex shadow-1 w-full hidden  email-input-container" id="otp-container">
+                    <input type="text" class = "border-none outline-none mt-10 " placeholder="Enter OTP received on your mail" name="uname" id="input_otp" required>
             </div>       
         <span id="sb_rb_error" style="color:red"></span>
                     <button type="submit"  id="request_otp_btn" class="btn primary-btn mt-10">Request Otp</button>
@@ -1252,7 +1317,7 @@ function accountSetup(){
         "wallet_div"
       ).innerHTML = `<div class="manage-account-details">
                 <div>
-                  <img src="../images/talewallet.svg" alt="Avatar" class="avatar">
+                  <img src="../images/talewallet.png" alt="Avatar" class="avatar">
                  </div>
                  <div class="font-bold text-medium">Let Tale wallet manage your passphrase and get 1 Algo in your wallet to get started</div>
                  <div class=" flex items-center gap-10 ">
@@ -1334,7 +1399,7 @@ function recoverAccountUI() {
                     </div>
                     <label for="uname"><b>Enter your passphrase</b></label>
                     <div class="flex flex-col shadow-1 w-full  email-input-container">
-                      <input type="text" class="border-none underline-none" placeholder="Enter your passphrase or seedphrase" name="uname" id="account_passphrase" required>
+                      <input type="text" class="border-none outline-none underline-none" placeholder="Enter your passphrase or seedphrase" name="uname" id="account_passphrase" required>
                    </div>
                    <span id="sb_rb_error"></span>
                     <button class="btn primary-btn" type="submit" id="sbt_reb_btn">Submit</button>
@@ -1383,7 +1448,27 @@ function showLoginUIUsingOTP(){
         });
     }
 }
+function alreadyHaveAccount(){
+    document.getElementById('wallet_div').innerHTML=`<div class="imgcontainer">
+    <img src="../images/talewallet.svg" alt="Avatar" class="avatar">
+ </div>
+ 
+ <div class="flex flex-col justify-end gap-20 mt-20">
+    <button class="btn primary-btn" id='login_using_email'>Login with Otp</button>
+    <button class="btn secondary-btn" id='recover_btn' >Recover with passphrase</div>
+ </div>`
 
+ var cbtn = document.getElementById('login_using_email');
+
+    // onClick's logic below:
+    cbtn.addEventListener('click', function() {
+        setAccountWithEmail();
+    });
+    var rctn = document.getElementById('recover_btn');
+    rctn.addEventListener('click', function() {
+        recoverAccountUI();
+    });
+}
 function createOrRecoverAccountUI() {
     document.getElementById('wallet_div').innerHTML  =`<div class="imgcontainer">
                    <img src="../images/talewallet.svg" alt="Avatar" class="avatar">
@@ -1395,27 +1480,15 @@ function createOrRecoverAccountUI() {
                 </div>
                 <div class ="create-account-actions">
                    <button class="btn primary-btn" type="submit" id="create_btn">Create Account</button>
-                  <button class="btn secondary-btn" type="submit" id="recover_btn">Recover Account</button>
+                  <button class="btn secondary-btn" type="submit" id="already_have_account">Already have Account</button>
                </div>
-        
-                <div class="container" >
-                   Already have Tale Wallet Account? <br /> <a id="login_using_email">Login using email & OTP</a>
-               </div>
-               
                </div>`;
 
-    var cbtn = document.getElementById('login_using_email');
+    
+    
+    document.getElementById("already_have_account").addEventListener("click",alreadyHaveAccount)
 
-    // onClick's logic below:
-    cbtn.addEventListener('click', function() {
-        setAccountWithEmail();
-    });
-    var rctn = document.getElementById('recover_btn');
 
-    // onClick's logic below:
-    rctn.addEventListener('click', function() {
-        recoverAccountUI();
-    });
     var lbtn = document.getElementById('create_btn');
     lbtn.addEventListener('click', function() {
         // createNewAccount();

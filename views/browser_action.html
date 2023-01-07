@@ -2,6 +2,7 @@
     /* Bordered form */
     :root{
         --taile-color:#bf00ff;
+        --tale-green:#bbff00;
     }
     form {
         border: 3px solid #f1f1f1;
@@ -40,6 +41,7 @@
 border-radius: 10px;
 background:white;
 overflow: hidden;
+border: 1px solid gray;
     }
 
     .email-input-container img{
@@ -73,11 +75,17 @@ overflow: hidden;
     .w-50{
         width: 50px;
     }
+    .w-80p{
+        width: 80%;
+    }
     .h-100{
         height: 100px;
     }
     .h-40{
         height: 30px;
+    }
+    .border-b-g{
+        border-bottom: 3px solid var(--tale-green);
     }
     .py-10{
         padding-top: 10px;
@@ -128,6 +136,9 @@ overflow: hidden;
     }
     .text-start{
         text-align: start;
+    }
+    .text-sm{
+        font-size: 10px;
     }
     .font-14{
         font-size: 14px;
@@ -207,7 +218,7 @@ overflow: hidden;
     .activity-button{
         border: none;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 13px;
     }
     .activity-selected{
         border-bottom: 2px solid #bbff00;
@@ -438,6 +449,7 @@ overflow: hidden;
     background: #fcfafa;
 }
 
+
 .main{
     width: 300px;
     text-align: center;
@@ -500,7 +512,10 @@ overflow: hidden;
 body{
     border-radius: 40px;
     margin: 0;
-    background-color: #f1f1f2;
+    /* background-color: #f1f1f2; */
+}
+button{
+    background-color: inherit;
 }
 a{
     text-decoration: none;
@@ -510,12 +525,21 @@ a{
 li{
     margin-bottom: 10px;
 }
+.h-15{
+    height: 15px;
+}
 ol{
     padding-left: 15px;
 }
 #rebuttals {
     text-align: left;
     margin-top: 40px;
+}
+#opt-in-option{
+    color: rgb(94, 138, 232);
+}
+#opt-in-option:hover{
+    color: var(--taile-color)
 }
 #wallet_div{
     padding: 10px 10px;
@@ -615,7 +639,7 @@ ol{
     <div style="text-align: left;" id="login_UI">
     </div>
     <div class="flex flex-col gap-20 hidden" id="wallet_asset_div">
-        <div class="font-bold text-medium flex justify-between  relative  ">
+        <div class="font-bold  flex justify-between  relative text-sm px-10 ">
             <button class="activity-button activity-selected relative z-10" id="show-Nfts">NFTs </button>
             <button class="activity-button relative left-10 z-10" id="show-token">Token </button>
             <button class="activity-button relative " id ="show-activity">Activities </button>
@@ -624,9 +648,6 @@ ol{
         <div class=" flex flex-wrap justify-center gap-20" id="wallet_asset_container"></div>
 
     </div>
-
-
-
 </div>
 
 
